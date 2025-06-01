@@ -61,7 +61,7 @@ fn update_tile_height(
     let player_xz = player_transform.translation.xz();
     for mut tile_transform in q_tile_transform.iter_mut() {
         let distance = tile_transform.translation.xz().distance(player_xz);
-        tile_transform.translation.y = -TILE_HALF_HEIGHT - (1.0 - distance.max(1.0).log10());
+        tile_transform.translation.y = -TILE_HALF_HEIGHT + distance.max(0.3).log10() - 2.0;
     }
     Ok(())
 }
