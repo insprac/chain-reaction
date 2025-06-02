@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::player::{Player, PlayerSet};
+use crate::{
+    hex_grid::{HexCoord, HexLayout},
+    player::{Player, PlayerSet},
+};
 
 const GRID_SIZE: usize = 100;
 
@@ -26,30 +29,41 @@ struct Tile;
 
 fn spawn_level(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    layout: Res<HexLayout>,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh_handle = meshes.add(Cuboid::new(TILE_SIZE, TILE_HEIGHT, TILE_SIZE));
+    let mesh_handle: Handle<Mesh> = asset_server.load(
+        GltfAssetLabel::Primitive {
+            mesh: 0,
+            primitive: 0,
+        }
+        .from_asset("hexagon.glb"),
+    );
+
     let material_handle = materials.add(StandardMaterial {
         base_color: Color::hsl(0.0, 0.0, 0.0),
         perceptual_roughness: 1.0,
         ..default()
     });
 
-    let half_grid_size = GRID_SIZE as f32 / 2.0;
-    for x in 0..GRID_SIZE {
-        for y in 0..GRID_SIZE {
-            commands.spawn((
-                Tile,
-                Mesh3d(mesh_handle.clone()),
-                MeshMaterial3d(material_handle.clone()),
-                Transform::from_xyz(
-                    x as f32 * TILE_SIZE - half_grid_size,
-                    TILE_HEIGHT * -0.5,
-                    y as f32 * TILE_SIZE - half_grid_size,
-                ),
-            ));
-        }
+    let hexes_to_spawn = HexCoord::origin().filled_disk(20);
+    for hex_coord in hexes_to_spawn.iter() {
+        let dist = hex_coord.distance(&HexCoord::origin());
+        let height = if dist >= 18 {
+            5.0 + rand::random_range(-1.0..3.0)
+        } else {
+            rand::random_range(-0.3..0.0)
+        };
+        let world_pos = layout.hex_to_world_3d(*hex_coord).with_y(height);
+
+        commands.spawn((
+            Mesh3d(mesh_handle.clone()),
+            MeshMaterial3d(material_handle.clone()),
+            Transform::from_translation(world_pos).with_scale(Vec3::ONE.with_y(10.0)),
+            *hex_coord,
+            Name::new(format!("Hex ({},{})", hex_coord.q, hex_coord.r)),
+        ));
     }
 }
 
