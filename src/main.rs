@@ -6,6 +6,7 @@ mod waves;
 mod lighting;
 mod arena;
 mod game_assets;
+mod health;
 
 fn main() {
     App::new()
@@ -17,5 +18,6 @@ fn main() {
         .add_plugins(lighting::LightingPlugin)
         .add_plugins(arena::ArenaPlugin)
         .add_plugins(game_assets::GameAssetPlugin)
+        .add_plugins(health::HealthPlugin)
         .run();
 }
