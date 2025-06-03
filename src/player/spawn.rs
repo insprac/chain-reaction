@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::health::Health;
+use crate::{force::ForceEmitter, health::Health};
 
 use super::{Player, PlayerCamera, PlayerGun};
 
@@ -13,6 +13,10 @@ pub fn setup_player(
         Player,
         PlayerGun::default(),
         Health::new(3),
+        ForceEmitter {
+            radius: 5.0,
+            strength: 20.0,
+        },
         children![
             // Camera
             (

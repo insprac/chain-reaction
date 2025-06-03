@@ -22,7 +22,7 @@ impl Plugin for PlayerPlugin {
             // Cleanup
             .add_systems(
                 OnExit(GameState::InGame),
-                spawn::cleanup_player.in_set(PlayerSet),
+                (spawn::cleanup_player, bullet::cleanup_bullets).in_set(PlayerSet),
             )
             // Update
             .add_systems(

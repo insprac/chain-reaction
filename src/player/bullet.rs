@@ -23,6 +23,12 @@ impl Default for PlayerBullet {
     }
 }
 
+pub fn cleanup_bullets(mut commands: Commands, q_bullets: Query<Entity, With<PlayerBullet>>) {
+    for entity in q_bullets {
+        commands.entity(entity).despawn();
+    }
+}
+
 pub fn update_bullets(
     mut commands: Commands,
     time: Res<Time>,
@@ -49,8 +55,16 @@ pub fn check_bullet_collision(
 ) {
     for (bullet_entity, bullet, bullet_trans) in q_bullet {
         for (enemy_entity, enemy_trans) in q_enemy {
-            if bullet_trans.translation.xz().distance(enemy_trans.translation.xz()) < BULLET_HIT_RADIUS {
-                evw_damage.write(DamageEvent { target: enemy_entity, damage: bullet.damage });
+            if bullet_trans
+                .translation
+                .xz()
+                .distance(enemy_trans.translation.xz())
+                < BULLET_HIT_RADIUS
+            {
+                evw_damage.write(DamageEvent {
+                    target: enemy_entity,
+                    damage: bullet.damage,
+                });
                 commands.entity(bullet_entity).despawn();
                 break;
             }

@@ -8,6 +8,7 @@ mod player;
 mod waves;
 mod menu;
 mod pause;
+mod force;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
@@ -40,5 +41,6 @@ fn main() {
         .add_plugins(arena::ArenaPlugin)
         .add_plugins(game_assets::GameAssetPlugin)
         .add_plugins(health::HealthPlugin)
+        .add_plugins(force::ForcePlugin)
         .run();
 }

@@ -5,9 +5,12 @@ use bevy::{
 };
 use hexx::{ColumnMeshBuilder, Hex, HexLayout, HexOrientation};
 
-use crate::GameState;
+use crate::{
+    GameState, PauseState,
+    force::{Force, ForceReceiver},
+};
 
-const COLUMN_HEIGHT: f32 = 20.0;
+const COLUMN_HEIGHT: f32 = 100.0;
 const ARENA_RADIUS: u32 = 20;
 const WALL_DEPTH: u32 = 3;
 
@@ -23,7 +26,13 @@ impl Plugin for ArenaPlugin {
             },
         })
         .add_systems(OnEnter(GameState::InGame), setup_arena)
-        .add_systems(OnExit(GameState::InGame), cleanup_arena);
+        .add_systems(OnExit(GameState::InGame), cleanup_arena)
+        .add_systems(
+            Update,
+            move_with_force
+                .run_if(in_state(GameState::InGame))
+                .run_if(in_state(PauseState::Running)),
+        );
     }
 }
 
@@ -38,7 +47,11 @@ impl Arena {
 
 #[derive(Component)]
 pub struct ArenaColumn {
+    /// The column's hex coordinates.
     pub hex: Hex,
+    /// The height offset of the column, this gives the floor a varied look.
+    pub offset: f32,
+    /// The type of column, determines how it should be interacted with.
     pub kind: ColumnKind,
 }
 
@@ -53,7 +66,7 @@ fn setup_arena(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh_handle = meshes.add(hex_column(&arena.layout));
+    let mesh_handle = meshes.add(hex_column_mesh(&arena.layout));
     let material_handle = materials.add(StandardMaterial {
         base_color: Color::srgb(0.0, 0.0, 0.0),
         perceptual_roughness: 1.0,
@@ -65,23 +78,30 @@ fn setup_arena(
         let dist = hex.unsigned_distance_to(Hex::ZERO);
         if dist <= ARENA_RADIUS {
             // Within the arena
+            let offset = rand::random_range(-0.3..0.0);
             commands.spawn((
                 Mesh3d(mesh_handle.clone()),
                 MeshMaterial3d(material_handle.clone()),
-                Transform::from_xyz(pos.x, rand::random_range(-0.3..0.0), pos.y),
+                Transform::from_xyz(pos.x, offset, pos.y),
                 ArenaColumn {
                     hex,
+                    offset,
                     kind: ColumnKind::Floor,
+                },
+                ForceReceiver {
+                    restitution_coefficient: 5.0,
                 },
             ));
         } else {
             // Outside the arena (wall)
+            let offset = 4.0 + rand::random_range(0.0..3.0);
             commands.spawn((
                 Mesh3d(mesh_handle.clone()),
                 MeshMaterial3d(material_handle.clone()),
-                Transform::from_xyz(pos.x, 4.0 + rand::random_range(0.0..3.0), pos.y),
+                Transform::from_xyz(pos.x, offset, pos.y),
                 ArenaColumn {
                     hex,
+                    offset,
                     kind: ColumnKind::Wall,
                 },
             ));
@@ -89,16 +109,21 @@ fn setup_arena(
     }
 }
 
-fn cleanup_arena(
-    mut commands: Commands,
-    q_arena_columns: Query<Entity, With<ArenaColumn>>,
-) {
+fn cleanup_arena(mut commands: Commands, q_arena_columns: Query<Entity, With<ArenaColumn>>) {
     for entity in q_arena_columns {
         commands.entity(entity).despawn();
     }
 }
 
-fn hex_column(hex_layout: &HexLayout) -> Mesh {
+fn move_with_force(
+    mut q_arena_columns: Query<(&ArenaColumn, &Force, &mut Transform), Changed<Force>>,
+) {
+    for (column, force, mut transform) in q_arena_columns.iter_mut() {
+        transform.translation.y = column.offset - force.force;
+    }
+}
+
+fn hex_column_mesh(hex_layout: &HexLayout) -> Mesh {
     let mesh_info = ColumnMeshBuilder::new(hex_layout, COLUMN_HEIGHT)
         .without_bottom_face()
         .with_offset(Vec3::new(0.0, -COLUMN_HEIGHT, 0.0))
