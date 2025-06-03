@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::player::Player;
+use crate::{game_assets::GameAssets, player::Player};
 
 const MOVE_SPEED: f32 = 2.0;
 
@@ -8,9 +8,7 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<EnemyAssets>()
-            .add_systems(Startup, load_enemy_assets.in_set(EnemySet))
-            .add_systems(Update, follow_player.in_set(EnemySet));
+        app.add_systems(Update, follow_player.in_set(EnemySet));
     }
 }
 
@@ -21,26 +19,20 @@ pub struct EnemySet;
 #[require(Transform, Visibility)]
 pub struct Enemy;
 
-#[derive(Resource, Default)]
-pub struct EnemyAssets {
-    mesh_handle: Option<Handle<Mesh>>,
-    material_handle: Option<Handle<StandardMaterial>>,
-}
-
 pub struct SpawnEnemiesCommand {
     pub positions: Vec<Vec3>,
 }
 
 impl Command for SpawnEnemiesCommand {
     fn apply(self, world: &mut World) -> () {
-        let Some(enemy_assets) = world.get_resource::<EnemyAssets>() else {
-            panic!("Failed to get EnemyAssets resource in SpawnEnemiesCommand");
-        };
-        let Some(mesh_handle) = enemy_assets.mesh_handle.clone() else {
-            panic!("mesh_handle wasn't present in EnemyAssets");
-        };
-        let Some(material_handle) = enemy_assets.material_handle.clone() else {
-            panic!("material_handle wasn't present in EnemyAssets");
+        let (mesh_handle, material_handle) = {
+            let Some(game_assets) = world.get_resource::<GameAssets>() else {
+                panic!("GameAssets not available during SpawnEnemiesCommand");
+            };
+            (
+                game_assets.enemy_mesh.clone(),
+                game_assets.enemy_material.clone(),
+            )
         };
 
         for pos in self.positions {
@@ -52,20 +44,6 @@ impl Command for SpawnEnemiesCommand {
             ));
         }
     }
-}
-
-fn load_enemy_assets(
-    mut enemy_assets: ResMut<EnemyAssets>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    enemy_assets.mesh_handle = Some(meshes.add(Cuboid::new(0.5, 0.3, 0.5)));
-    enemy_assets.material_handle = Some(materials.add(StandardMaterial {
-        base_color: Color::hsl(350.0, 1.0, 0.5),
-        perceptual_roughness: 1.0,
-        unlit: true,
-        ..default()
-    }));
 }
 
 fn follow_player(

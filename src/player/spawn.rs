@@ -1,20 +1,15 @@
 use bevy::prelude::*;
 
-use super::{Player, PlayerCamera};
+use super::{Player, PlayerCamera, PlayerGun};
 
 pub fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let material_handle = materials.add(StandardMaterial {
-        base_color: Color::hsl(100.0, 0.9, 0.5),
-        perceptual_roughness: 1.0,
-        ..default()
-    });
-
     commands.spawn((
         Player,
+        PlayerGun::default(),
         children![
             // Camera
             (
@@ -28,14 +23,21 @@ pub fn spawn_player(
             // Player body
             (
                 Mesh3d(meshes.add(Cylinder::new(0.5, 0.2))),
-                MeshMaterial3d(material_handle.clone()),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::hsl(100.0, 0.7, 0.5),
+                    perceptual_roughness: 1.0,
+                    ..default()
+                })),
                 Transform::from_xyz(0.0, 0.5, 0.0),
             ),
             // Light
             (
-                PointLight { range: 10.0, ..default() },
+                PointLight {
+                    range: 10.0,
+                    ..default()
+                },
                 Transform::from_xyz(0.0, 2.0, 0.0),
-            )
+            ),
         ],
     ));
 }

@@ -5,6 +5,7 @@ mod enemy;
 mod waves;
 mod lighting;
 mod arena;
+mod game_assets;
 
 fn main() {
     App::new()
@@ -15,5 +16,6 @@ fn main() {
         .add_plugins(waves::WavePlugin)
         .add_plugins(lighting::LightingPlugin)
         .add_plugins(arena::ArenaPlugin)
+        .add_plugins(game_assets::GameAssetPlugin)
         .run();
 }
