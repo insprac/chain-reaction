@@ -2,17 +2,21 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
+use crate::{enemy::Enemy, health::DamageEvent};
+
 const BULLET_SPEED: f32 = 30.0;
 const BULLET_LIFETIME_SECS: u64 = 3;
 
 #[derive(Component)]
 pub struct PlayerBullet {
+    damage: u16,
     timer: Timer,
 }
 
 impl Default for PlayerBullet {
     fn default() -> Self {
         PlayerBullet {
+            damage: 1,
             timer: Timer::new(Duration::from_secs(BULLET_LIFETIME_SECS), TimerMode::Once),
         }
     }
@@ -33,5 +37,21 @@ pub fn update_bullets(
 
         transform.translation =
             transform.translation + transform.forward() * BULLET_SPEED * time.delta_secs();
+    }
+}
+
+pub fn check_bullet_collision(
+    mut commands: Commands,
+    mut evw_damage: EventWriter<DamageEvent>,
+    q_bullet: Query<(Entity, &PlayerBullet, &Transform), Without<Enemy>>,
+    q_enemy: Query<(Entity, &Transform), With<Enemy>>,
+) {
+    for (bullet_entity, bullet, bullet_trans) in q_bullet {
+        for (enemy_entity, enemy_trans) in q_enemy {
+            if bullet_trans.translation.xz().distance(enemy_trans.translation.xz()) < 0.5 {
+                evw_damage.write(DamageEvent { target: enemy_entity, damage: bullet.damage });
+                commands.entity(bullet_entity).despawn();
+            }
+        }
     }
 }

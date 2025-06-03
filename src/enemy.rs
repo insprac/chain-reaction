@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{game_assets::GameAssets, player::Player};
+use crate::{
+    game_assets::GameAssets,
+    health::{DiedEvent, Health},
+    player::Player,
+};
 
 const MOVE_SPEED: f32 = 2.0;
 
@@ -36,12 +40,15 @@ impl Command for SpawnEnemiesCommand {
         };
 
         for pos in self.positions {
-            world.spawn((
-                Enemy,
-                Transform::from_xyz(pos.x, 0.0, pos.z),
-                Mesh3d(mesh_handle.clone()),
-                MeshMaterial3d(material_handle.clone()),
-            ));
+            world
+                .spawn((
+                    Enemy,
+                    Health::new(1),
+                    Transform::from_xyz(pos.x, 0.0, pos.z),
+                    Mesh3d(mesh_handle.clone()),
+                    MeshMaterial3d(material_handle.clone()),
+                ))
+                .observe(despawn_on_death);
         }
     }
 }
@@ -62,4 +69,8 @@ fn follow_player(
     }
 
     Ok(())
+}
+
+fn despawn_on_death(trigger: Trigger<DiedEvent>, mut commands: Commands) {
+    commands.entity(trigger.entity).despawn();
 }

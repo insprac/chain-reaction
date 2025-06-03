@@ -8,7 +8,7 @@ use super::bullet::PlayerBullet;
 
 #[derive(Component)]
 pub struct PlayerGun {
-    // The angle of the gun in the range [-π, +π]
+    /// The angle of the gun in radians (in the range [-π, +π]).
     pub angle: f32,
     pub cooldown: Timer,
 }
@@ -17,7 +17,7 @@ impl Default for PlayerGun {
     fn default() -> Self {
         PlayerGun {
             angle: 0.0,
-            cooldown: Timer::new(Duration::from_secs(1), TimerMode::Once),
+            cooldown: Timer::new(Duration::from_millis(500), TimerMode::Once),
         }
     }
 }

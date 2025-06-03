@@ -4,16 +4,19 @@ pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                apply_heal_event.run_if(on_event::<HealEvent>),
-                apply_damage_event
-                    .run_if(on_event::<DamageEvent>)
-                    .after(apply_heal_event),
-            )
-                .in_set(HealthSet),
-        );
+        app.add_event::<DamageEvent>()
+            .add_event::<HealEvent>()
+            .add_event::<DiedEvent>()
+            .add_systems(
+                Update,
+                (
+                    apply_heal_event.run_if(on_event::<HealEvent>),
+                    apply_damage_event
+                        .run_if(on_event::<DamageEvent>)
+                        .after(apply_heal_event),
+                )
+                    .in_set(HealthSet),
+            );
     }
 }
 
@@ -23,8 +26,8 @@ pub struct HealthSet;
 /// A unit's health, current health should never be modified directly, use `DamageEvent` and
 /// `HealEvent` instead.
 ///
-/// When current health reaches 0 a `DiedEvent` is emitted and any future heals or damage are
-/// ignored.
+/// When current health reaches 0 a `DiedEvent` is emitted and triggered on the entity,
+/// then any future heals or damage are ignored.
 #[derive(Component)]
 pub struct Health {
     pub current: u16,
@@ -58,12 +61,13 @@ pub struct HealEvent {
 }
 
 /// Emitted when health reaches 0.
-#[derive(Event)]
+#[derive(Event, Clone)]
 pub struct DiedEvent {
     pub entity: Entity,
 }
 
 fn apply_damage_event(
+    mut commands: Commands,
     mut evr_damage: EventReader<DamageEvent>,
     mut evw_died: EventWriter<DiedEvent>,
     mut q_health: Query<&mut Health>,
@@ -81,9 +85,9 @@ fn apply_damage_event(
             health.current -= event.damage;
         } else {
             health.current = 0;
-            evw_died.write(DiedEvent {
-                entity: event.target,
-            });
+            let died_event = DiedEvent { entity: event.target };
+            evw_died.write(died_event.clone());
+            commands.entity(event.target).trigger(died_event);
         }
     }
 }

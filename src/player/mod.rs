@@ -20,6 +20,7 @@ impl Plugin for PlayerPlugin {
                     gun::update_gun_cooldown,
                     gun::fire_gun.run_if(input_pressed(MouseButton::Left)),
                     bullet::update_bullets,
+                    bullet::check_bullet_collision.after(bullet::update_bullets),
                 )
                     .in_set(PlayerSet),
             );
