@@ -25,7 +25,9 @@ impl Plugin for LevelPlugin {
 pub struct Level;
 
 #[derive(Component)]
-struct Tile;
+struct Tile {
+    offset: f32,
+}
 
 fn spawn_level(
     mut commands: Commands,
@@ -53,7 +55,7 @@ fn spawn_level(
         let height = if dist >= 18 {
             5.0 + rand::random_range(-1.0..3.0)
         } else {
-            rand::random_range(-0.3..0.0)
+            rand::random_range(-0.5..0.0)
         };
         let world_pos = layout.hex_to_world_3d(*hex_coord).with_y(height);
 
@@ -63,19 +65,21 @@ fn spawn_level(
             Transform::from_translation(world_pos).with_scale(Vec3::ONE.with_y(10.0)),
             *hex_coord,
             Name::new(format!("Hex ({},{})", hex_coord.q, hex_coord.r)),
+            Tile { offset: height },
         ));
     }
 }
 
 fn update_tile_height(
     q_player_transform: Query<&Transform, With<Player>>,
-    mut q_tile_transform: Query<&mut Transform, (With<Tile>, Without<Player>)>,
+    mut q_tile_transform: Query<(&Tile, &mut Transform), Without<Player>>,
 ) -> Result {
     let player_transform = q_player_transform.single()?;
     let player_xz = player_transform.translation.xz();
-    for mut tile_transform in q_tile_transform.iter_mut() {
+    for (tile, mut tile_transform) in q_tile_transform.iter_mut() {
         let distance = tile_transform.translation.xz().distance(player_xz);
-        tile_transform.translation.y = -TILE_HALF_HEIGHT + distance.max(0.3).log10() - 2.0;
+        let curve = (distance.max(0.5).log2() - 2.0).min(0.0);
+        tile_transform.translation.y = tile.offset + curve * 0.5;
     }
     Ok(())
 }

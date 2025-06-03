@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::player::Player;
 
-const MOVE_SPEED: f32 = 3.0;
+const MOVE_SPEED: f32 = 2.0;
 
 pub struct EnemyPlugin;
 
