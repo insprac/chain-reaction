@@ -2,17 +2,18 @@ use bevy::prelude::*;
 
 use crate::{
     game_assets::GameAssets,
-    health::{DiedEvent, Health},
+    health::{DamageEvent, DiedEvent, Health},
     player::Player,
 };
 
 const MOVE_SPEED: f32 = 2.0;
+const COLLISION_DISTANCE: f32 = 0.8;
 
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, follow_player.in_set(EnemySet));
+        app.add_systems(Update, follow_and_self_destruct.in_set(EnemySet));
     }
 }
 
@@ -53,19 +54,28 @@ impl Command for SpawnEnemiesCommand {
     }
 }
 
-fn follow_player(
+fn follow_and_self_destruct(
+    mut commands: Commands,
+    mut evw_damage: EventWriter<DamageEvent>,
     time: Res<Time>,
-    q_player_transform: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut q_enemy_transform: Query<&mut Transform, With<Enemy>>,
+    q_player: Query<(Entity, &Transform), (With<Player>, Without<Enemy>)>,
+    mut q_enemy: Query<(Entity, &mut Transform), With<Enemy>>,
 ) -> Result {
-    let player_translation = q_player_transform.single()?.translation;
+    let (player_entity, player_transform) = q_player.single()?;
+    let player_pos = player_transform.translation;
 
-    for mut enemy_transform in q_enemy_transform.iter_mut() {
+    for (enemy_entity, mut enemy_transform) in q_enemy.iter_mut() {
         let y = enemy_transform.translation.y;
-        let direction =
-            (player_translation.with_y(y) - enemy_transform.translation).normalize_or_zero();
+        let direction = (player_pos.with_y(y) - enemy_transform.translation).normalize_or_zero();
         enemy_transform.translation += direction * MOVE_SPEED * time.delta_secs();
-        enemy_transform.look_at(player_translation.with_y(y), Vec3::Y);
+        enemy_transform.look_at(player_pos.with_y(y), Vec3::Y);
+        if player_pos.xz().distance(enemy_transform.translation.xz()) < COLLISION_DISTANCE {
+            evw_damage.write(DamageEvent {
+                target: player_entity,
+                damage: 1,
+            });
+            commands.entity(enemy_entity).despawn();
+        }
     }
 
     Ok(())

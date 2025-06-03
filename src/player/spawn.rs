@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::health::Health;
+
 use super::{Player, PlayerCamera, PlayerGun};
 
 pub fn spawn_player(
@@ -10,6 +12,7 @@ pub fn spawn_player(
     commands.spawn((
         Player,
         PlayerGun::default(),
+        Health::new(3),
         children![
             // Camera
             (
