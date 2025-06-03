@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    GameState, PauseState,
     game_assets::GameAssets,
     health::{DamageEvent, DiedEvent, Health},
     player::Player,
@@ -13,7 +14,14 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, follow_and_self_destruct.in_set(EnemySet));
+        app.add_systems(OnExit(GameState::InGame), cleanup_enemies)
+            .add_systems(
+                Update,
+                follow_and_self_destruct
+                    .in_set(EnemySet)
+                    .run_if(in_state(GameState::InGame))
+                    .run_if(in_state(PauseState::Running)),
+            );
     }
 }
 
@@ -51,6 +59,12 @@ impl Command for SpawnEnemiesCommand {
                 ))
                 .observe(despawn_on_death);
         }
+    }
+}
+
+fn cleanup_enemies(mut commands: Commands, q_enemy: Query<Entity, With<Enemy>>) {
+    for entity in q_enemy {
+        commands.entity(entity).despawn();
     }
 }
 

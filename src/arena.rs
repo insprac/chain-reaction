@@ -5,6 +5,8 @@ use bevy::{
 };
 use hexx::{ColumnMeshBuilder, Hex, HexLayout, HexOrientation};
 
+use crate::GameState;
+
 const COLUMN_HEIGHT: f32 = 20.0;
 const ARENA_RADIUS: u32 = 20;
 const WALL_DEPTH: u32 = 3;
@@ -20,7 +22,8 @@ impl Plugin for ArenaPlugin {
                 ..default()
             },
         })
-        .add_systems(Startup, spawn_arena);
+        .add_systems(OnEnter(GameState::InGame), setup_arena)
+        .add_systems(OnExit(GameState::InGame), cleanup_arena);
     }
 }
 
@@ -44,7 +47,7 @@ pub enum ColumnKind {
     Wall,
 }
 
-fn spawn_arena(
+fn setup_arena(
     mut commands: Commands,
     arena: Res<Arena>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -83,6 +86,15 @@ fn spawn_arena(
                 },
             ));
         }
+    }
+}
+
+fn cleanup_arena(
+    mut commands: Commands,
+    q_arena_columns: Query<Entity, With<ArenaColumn>>,
+) {
+    for entity in q_arena_columns {
+        commands.entity(entity).despawn();
     }
 }
 

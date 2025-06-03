@@ -4,7 +4,7 @@ use crate::health::Health;
 
 use super::{Player, PlayerCamera, PlayerGun};
 
-pub fn spawn_player(
+pub fn setup_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -43,4 +43,13 @@ pub fn spawn_player(
             ),
         ],
     ));
+}
+
+pub fn cleanup_player(
+    mut commands: Commands,
+    q_player: Query<Entity, With<Player>>,
+) -> Result {
+    let entity = q_player.single()?;
+    commands.entity(entity).despawn();
+    Ok(())
 }

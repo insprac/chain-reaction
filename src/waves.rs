@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 
-use crate::enemy::{EnemySet, SpawnEnemiesCommand};
+use crate::{
+    GameState,
+    enemy::{EnemySet, SpawnEnemiesCommand},
+};
 
 pub struct WavePlugin;
 
 impl Plugin for WavePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_enemies.in_set(EnemySet));
+        app.add_systems(OnEnter(GameState::InGame), spawn_enemies.in_set(EnemySet));
     }
 }
 

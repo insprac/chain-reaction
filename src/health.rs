@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::{GameState, PauseState};
+
 pub struct HealthPlugin;
 
 impl Plugin for HealthPlugin {
@@ -15,7 +17,9 @@ impl Plugin for HealthPlugin {
                         .run_if(on_event::<DamageEvent>)
                         .after(apply_heal_event),
                 )
-                    .in_set(HealthSet),
+                    .in_set(HealthSet)
+                    .run_if(in_state(GameState::InGame))
+                    .run_if(in_state(PauseState::Running)),
             );
     }
 }
@@ -85,7 +89,9 @@ fn apply_damage_event(
             health.current -= event.damage;
         } else {
             health.current = 0;
-            let died_event = DiedEvent { entity: event.target };
+            let died_event = DiedEvent {
+                entity: event.target,
+            };
             evw_died.write(died_event.clone());
             commands.entity(event.target).trigger(died_event);
         }
