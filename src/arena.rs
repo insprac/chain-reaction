@@ -33,7 +33,7 @@ pub struct Arena {
 }
 
 impl Arena {
-    const RADIUS: u32 = ARENA_RADIUS;
+    pub const RADIUS: u32 = ARENA_RADIUS;
 }
 
 #[derive(Component)]

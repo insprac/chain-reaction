@@ -1,8 +1,10 @@
 use bevy::prelude::*;
+use hexx::Hex;
 
 use crate::{
     GameState,
-    enemy::{EnemySet, SpawnEnemiesCommand},
+    arena::Arena,
+    enemy::{EnemySet, SpawnEnemyCommand},
 };
 
 pub struct WavePlugin;
@@ -13,12 +15,14 @@ impl Plugin for WavePlugin {
     }
 }
 
-fn spawn_enemies(mut commands: Commands) {
-    commands.queue(SpawnEnemiesCommand {
-        positions: vec![
-            Vec3::new(10.0, 0.0, 5.0),
-            Vec3::new(-10.0, 0.0, 10.0),
-            Vec3::new(-5.0, 0.0, -10.0),
-        ],
-    });
+fn spawn_enemies(mut commands: Commands, arena: Res<Arena>) {
+    let mut hexes: Vec<Hex> = Hex::ZERO.ring(Arena::RADIUS).collect();
+    for _ in 0..20 {
+        if hexes.len() == 0 {
+            break;
+        }
+        let index = rand::random_range(0..hexes.len() - 1);
+        let hex = hexes.swap_remove(index);
+        commands.queue(SpawnEnemyCommand::new(arena.layout.hex_to_world_pos(hex)));
+    }
 }

@@ -7,7 +7,7 @@ use crate::{
     player::Player,
 };
 
-const MOVE_SPEED: f32 = 2.0;
+const MOVE_SPEED: f32 = 5.0;
 const COLLISION_DISTANCE: f32 = 0.8;
 
 pub struct EnemyPlugin;
@@ -32,11 +32,17 @@ pub struct EnemySet;
 #[require(Transform, Visibility)]
 pub struct Enemy;
 
-pub struct SpawnEnemiesCommand {
-    pub positions: Vec<Vec3>,
+pub struct SpawnEnemyCommand {
+    pub position: Vec2,
 }
 
-impl Command for SpawnEnemiesCommand {
+impl SpawnEnemyCommand {
+    pub fn new(position: Vec2) -> Self {
+        Self { position }
+    }
+}
+
+impl Command for SpawnEnemyCommand {
     fn apply(self, world: &mut World) -> () {
         let (mesh_handle, material_handle) = {
             let Some(game_assets) = world.get_resource::<GameAssets>() else {
@@ -48,17 +54,15 @@ impl Command for SpawnEnemiesCommand {
             )
         };
 
-        for pos in self.positions {
-            world
-                .spawn((
-                    Enemy,
-                    Health::new(1),
-                    Transform::from_xyz(pos.x, 0.0, pos.z),
-                    Mesh3d(mesh_handle.clone()),
-                    MeshMaterial3d(material_handle.clone()),
-                ))
-                .observe(despawn_on_death);
-        }
+        world
+            .spawn((
+                Enemy,
+                Health::new(1),
+                Transform::from_xyz(self.position.x, 0.0, self.position.y),
+                Mesh3d(mesh_handle.clone()),
+                MeshMaterial3d(material_handle.clone()),
+            ))
+            .observe(despawn_on_death);
     }
 }
 

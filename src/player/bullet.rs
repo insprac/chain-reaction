@@ -6,6 +6,7 @@ use crate::{enemy::Enemy, health::DamageEvent};
 
 const BULLET_SPEED: f32 = 30.0;
 const BULLET_LIFETIME_SECS: u64 = 3;
+const BULLET_HIT_RADIUS: f32 = 0.5;
 
 #[derive(Component)]
 pub struct PlayerBullet {
@@ -48,9 +49,10 @@ pub fn check_bullet_collision(
 ) {
     for (bullet_entity, bullet, bullet_trans) in q_bullet {
         for (enemy_entity, enemy_trans) in q_enemy {
-            if bullet_trans.translation.xz().distance(enemy_trans.translation.xz()) < 0.5 {
+            if bullet_trans.translation.xz().distance(enemy_trans.translation.xz()) < BULLET_HIT_RADIUS {
                 evw_damage.write(DamageEvent { target: enemy_entity, damage: bullet.damage });
                 commands.entity(bullet_entity).despawn();
+                break;
             }
         }
     }
