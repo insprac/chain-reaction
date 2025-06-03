@@ -20,15 +20,16 @@ impl Plugin for MenuPlugin {
 pub struct Menu;
 
 #[derive(Component)]
+#[require(Button)]
 pub enum MenuButton {
     Play,
+    Exit,
 }
 
 #[derive(Component)]
 pub struct MenuCamera;
 
 fn setup_menu(mut commands: Commands) {
-    info!("Setup menu");
     commands.spawn((
         Menu,
         Node {
@@ -36,25 +37,14 @@ fn setup_menu(mut commands: Commands) {
             height: Val::Percent(100.0),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(30.0),
             ..default()
         },
-        children![(
-            MenuButton::Play,
-            Button,
-            Node {
-                width: Val::Px(150.0),
-                height: Val::Px(65.0),
-                ..default()
-            },
-            children![
-                Text::new("Play Game"),
-                TextColor(NORMAL_BUTTON),
-                TextFont {
-                    font_size: 30.0,
-                    ..default()
-                },
-            ]
-        )],
+        children![
+            create_button(MenuButton::Play, "Play Game"),
+            create_button(MenuButton::Exit, "Exit")
+        ],
     ));
 
     commands.spawn((MenuCamera, Camera2d));
@@ -65,8 +55,6 @@ fn cleanup_menu(
     q_menu: Query<Entity, With<Menu>>,
     q_menu_camera: Query<Entity, With<MenuCamera>>,
 ) -> Result {
-    info!("Cleanup menu");
-
     let menu_entity = q_menu.single()?;
     commands.entity(menu_entity).despawn();
 
@@ -83,6 +71,7 @@ fn button_interaction(
         Changed<Interaction>,
     >,
     mut q_text_color: Query<&mut TextColor>,
+    mut evw_app_exit: EventWriter<AppExit>,
 ) -> Result {
     for (interaction, menu_button, mut button, children) in q_interaction.iter_mut() {
         let mut text_color = q_text_color.get_mut(children[0])?;
@@ -95,6 +84,9 @@ fn button_interaction(
                 match *menu_button {
                     MenuButton::Play => {
                         commands.set_state(GameState::InGame);
+                    }
+                    MenuButton::Exit => {
+                        evw_app_exit.write(AppExit::Success);
                     }
                 }
             }
@@ -109,4 +101,8 @@ fn button_interaction(
     }
 
     Ok(())
+}
+
+fn create_button(button: MenuButton, text: &str) -> impl Bundle + use<> {
+    (button, children![Text::new(text), TextColor(NORMAL_BUTTON)])
 }

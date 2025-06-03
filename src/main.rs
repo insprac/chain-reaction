@@ -7,6 +7,7 @@ mod health;
 mod player;
 mod waves;
 mod menu;
+mod pause;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
@@ -32,6 +33,7 @@ fn main() {
         .insert_resource(ClearColor(Color::hsl(0.0, 0.0, 0.015)))
         // Game Plugins
         .add_plugins(menu::MenuPlugin)
+        .add_plugins(pause::PausePlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(enemy::EnemyPlugin)
         .add_plugins(waves::WavePlugin)
