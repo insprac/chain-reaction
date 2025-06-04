@@ -10,6 +10,7 @@ mod menu;
 mod pause;
 mod force;
 mod materials;
+mod arena_index;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
@@ -44,5 +45,6 @@ fn main() {
         .add_plugins(health::HealthPlugin)
         .add_plugins(force::ForcePlugin)
         .add_plugins(materials::MaterialsPlugin)
+        .add_plugins(arena_index::ArenaIndexPlugin)
         .run();
 }

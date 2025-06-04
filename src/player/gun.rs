@@ -2,7 +2,10 @@ use std::{f32::consts::PI, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::game_assets::GameAssets;
+use crate::{
+    arena_index::{ArenaHex, OutOfBoundsEvent},
+    game_assets::GameAssets,
+};
 
 use super::bullet::PlayerBullet;
 
@@ -56,12 +59,20 @@ pub fn fire_gun(
         .with_rotation(Quat::from_axis_angle(Vec3::Y, -PI / 2.0 + -gun.angle));
     transform.translation = transform.translation + transform.forward().as_vec3();
 
-    commands.spawn((
-        PlayerBullet::default(),
-        Mesh3d(game_assets.player_bullet_mesh.clone()),
-        MeshMaterial3d(game_assets.player_bullet_material.clone()),
-        transform,
-    ));
+    commands
+        .spawn((
+            PlayerBullet::default(),
+            Mesh3d(game_assets.player_bullet_mesh.clone()),
+            MeshMaterial3d(game_assets.player_bullet_material.clone()),
+            transform,
+            ArenaHex::default(),
+        ))
+        .observe(
+            |trigger: Trigger<OutOfBoundsEvent>, mut commands: Commands| {
+                // Despawn bullet when it goes out of arena bounds
+                commands.entity(trigger.target()).despawn();
+            },
+        );
 
     Ok(())
 }

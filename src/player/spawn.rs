@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{force::ForceEmitter, health::Health};
+use crate::{arena_index::ArenaHex, force::ForceEmitter, health::Health};
 
 use super::{Player, PlayerCamera, PlayerGun};
 
@@ -17,6 +17,7 @@ pub fn setup_player(
             radius: 5.0,
             strength: 20.0,
         },
+        ArenaHex::default(),
         children![
             // Camera
             (
