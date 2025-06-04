@@ -40,19 +40,16 @@ pub fn setup_player(
             // Light
             (
                 PointLight {
-                    range: 10.0,
+                    range: 30.0,
                     ..default()
                 },
-                Transform::from_xyz(0.0, 2.0, 0.0),
+                Transform::from_xyz(0.0, 3.0, 0.0),
             ),
         ],
     ));
 }
 
-pub fn cleanup_player(
-    mut commands: Commands,
-    q_player: Query<Entity, With<Player>>,
-) -> Result {
+pub fn cleanup_player(mut commands: Commands, q_player: Query<Entity, With<Player>>) -> Result {
     let entity = q_player.single()?;
     commands.entity(entity).despawn();
     Ok(())

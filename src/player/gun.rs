@@ -17,7 +17,7 @@ impl Default for PlayerGun {
     fn default() -> Self {
         PlayerGun {
             angle: 0.0,
-            cooldown: Timer::new(Duration::from_millis(500), TimerMode::Once),
+            cooldown: Timer::new(Duration::from_millis(200), TimerMode::Once),
         }
     }
 }

@@ -5,7 +5,7 @@ use crate::{enemy::Enemy, health::DamageEvent};
 
 const BULLET_SPEED: f32 = 30.0;
 const BULLET_LIFETIME_SECS: u64 = 3;
-const BULLET_HIT_RADIUS: f32 = 0.5;
+const BULLET_HIT_RADIUS: f32 = 1.0;
 
 #[derive(Component)]
 pub struct PlayerBullet {

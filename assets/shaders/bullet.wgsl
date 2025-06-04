@@ -11,7 +11,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 
     if distance(in.uv, center) < 0.5 {
         let alpha = -log(abs(in.uv.y)) * 0.2;
-        return vec4<f32>(material_color.rgb, alpha + distort);
+        return vec4<f32>(material_color.rgb, alpha);
     } else {
         return vec4<f32>(material_color.rgb, 0.0);
     }
