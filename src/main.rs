@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::prelude::{App, ClearColor, Color, DefaultPlugins, States, AppExtStates};
 
 mod arena;
 mod enemy;
@@ -9,6 +9,7 @@ mod waves;
 mod menu;
 mod pause;
 mod force;
+mod materials;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
@@ -42,5 +43,6 @@ fn main() {
         .add_plugins(game_assets::GameAssetPlugin)
         .add_plugins(health::HealthPlugin)
         .add_plugins(force::ForcePlugin)
+        .add_plugins(materials::MaterialsPlugin)
         .run();
 }

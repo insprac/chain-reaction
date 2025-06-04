@@ -1,6 +1,5 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
+use std::time::Duration;
 
 use crate::{enemy::Enemy, health::DamageEvent};
 
