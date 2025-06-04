@@ -6,7 +6,7 @@ use bevy::{
 use hexx::{ColumnMeshBuilder, Hex, HexLayout, HexOrientation};
 
 use crate::{
-    GameState, PauseState,
+    AppState, GameState,
     arena_index::ArenaIndex,
     force::{Force, ForceReceiver},
 };
@@ -26,13 +26,13 @@ impl Plugin for ArenaPlugin {
                 ..default()
             },
         })
-        .add_systems(OnEnter(GameState::InGame), setup_arena)
-        .add_systems(OnExit(GameState::InGame), cleanup_arena)
+        .add_systems(OnEnter(AppState::InGame), setup_arena)
+        .add_systems(OnExit(AppState::InGame), cleanup_arena)
         .add_systems(
             Update,
             move_column_with_force
-                .run_if(in_state(GameState::InGame))
-                .run_if(in_state(PauseState::Running)),
+                .run_if(in_state(AppState::InGame))
+                .run_if(in_state(GameState::Running)),
         );
     }
 }

@@ -1,6 +1,6 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-use crate::{GameState, PauseState};
+use crate::{AppState, GameState};
 
 const NORMAL_BUTTON: Color = Color::srgb(1.0, 1.0, 1.0);
 const HOVERED_BUTTON: Color = Color::srgb(0.0, 0.63, 1.0);
@@ -10,21 +10,21 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(PauseState::Paused), setup_menu)
-            .add_systems(OnExit(PauseState::Paused), cleanup_menu)
-            .add_systems(OnExit(GameState::InGame), unpause_game)
+        app.add_systems(OnEnter(GameState::Paused), setup_menu)
+            .add_systems(OnExit(GameState::Paused), cleanup_menu)
+            .add_systems(OnExit(AppState::InGame), unpause_game)
             .add_systems(
                 Update,
                 (
                     pause_game
-                        .run_if(in_state(PauseState::Running))
+                        .run_if(in_state(GameState::Running))
                         .run_if(input_just_pressed(KeyCode::Escape)),
                     unpause_game
-                        .run_if(in_state(PauseState::Paused))
+                        .run_if(in_state(GameState::Paused))
                         .run_if(input_just_pressed(KeyCode::Escape)),
-                    button_interaction.run_if(in_state(PauseState::Paused)),
+                    button_interaction.run_if(in_state(GameState::Paused)),
                 )
-                    .run_if(in_state(GameState::InGame)),
+                    .run_if(in_state(AppState::InGame)),
             );
     }
 }
@@ -41,11 +41,11 @@ pub enum PauseMenuButton {
 }
 
 fn pause_game(mut commands: Commands) {
-    commands.set_state(PauseState::Paused);
+    commands.set_state(GameState::Paused);
 }
 
 fn unpause_game(mut commands: Commands) {
-    commands.set_state(PauseState::Running);
+    commands.set_state(GameState::Running);
 }
 
 fn setup_menu(mut commands: Commands) {
@@ -94,13 +94,13 @@ fn button_interaction(
 
                 match *menu_button {
                     PauseMenuButton::Resume => {
-                        commands.set_state(PauseState::Running);
+                        commands.set_state(GameState::Running);
                     }
                     PauseMenuButton::Exit => {
                         evw_app_exit.write(AppExit::Success);
                     }
                     PauseMenuButton::Menu => {
-                        commands.set_state(GameState::Menu);
+                        commands.set_state(AppState::Menu);
                     }
                 }
             }

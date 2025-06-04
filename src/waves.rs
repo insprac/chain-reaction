@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use hexx::Hex;
 
 use crate::{
-    GameState,
+    AppState,
     arena::Arena,
     enemy::{EnemySet, SpawnEnemyCommand},
 };
@@ -11,7 +11,7 @@ pub struct WavePlugin;
 
 impl Plugin for WavePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::InGame), spawn_enemies.in_set(EnemySet));
+        app.add_systems(OnEnter(AppState::InGame), spawn_enemies.in_set(EnemySet));
     }
 }
 

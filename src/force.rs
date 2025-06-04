@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
-use crate::{GameState, PauseState};
+use crate::{AppState, GameState};
 
 pub struct ForcePlugin;
 
 impl Plugin for ForcePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(GameState::InGame), cleanup_emitters)
+        app.add_systems(OnExit(AppState::InGame), cleanup_emitters)
             .add_systems(
                 Update,
                 (apply_force, reduce_force)
                     .in_set(ForceSet)
-                    .run_if(in_state(GameState::InGame))
-                    .run_if(in_state(PauseState::Running)),
+                    .run_if(in_state(AppState::InGame))
+                    .run_if(in_state(GameState::Running)),
             );
     }
 }

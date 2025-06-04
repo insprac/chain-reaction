@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use hexx::Hex;
 
 use crate::{
-    GameState, PauseState,
+    AppState, GameState,
     arena::{ARENA_RADIUS, Arena},
 };
 
@@ -16,8 +16,8 @@ impl Plugin for ArenaIndexPlugin {
             .add_systems(
                 Update,
                 update_arena_hex_and_index
-                    .run_if(in_state(GameState::InGame))
-                    .run_if(in_state(PauseState::Running)),
+                    .run_if(in_state(AppState::InGame))
+                    .run_if(in_state(GameState::Running)),
             )
             .add_observer(remove_entity_from_index);
     }

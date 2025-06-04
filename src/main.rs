@@ -13,14 +13,14 @@ mod materials;
 mod arena_index;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum GameState {
+pub enum AppState {
     Menu,
     InGame,
     GameOver,
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum PauseState {
+pub enum GameState {
     Running,
     Paused,
 }
@@ -30,8 +30,8 @@ fn main() {
         // Defaults
         .add_plugins(DefaultPlugins)
         // States
-        .insert_state(GameState::Menu)
-        .insert_state(PauseState::Running)
+        .insert_state(AppState::Menu)
+        .insert_state(GameState::Running)
         // Resources
         .insert_resource(ClearColor(Color::hsl(0.0, 0.0, 0.015)))
         // Game Plugins

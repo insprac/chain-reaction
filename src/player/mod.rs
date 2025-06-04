@@ -7,7 +7,7 @@ mod spawn;
 
 pub use gun::PlayerGun;
 
-use crate::{GameState, PauseState};
+use crate::{AppState, GameState};
 
 pub struct PlayerPlugin;
 
@@ -16,12 +16,12 @@ impl Plugin for PlayerPlugin {
         app
             // Setup
             .add_systems(
-                OnEnter(GameState::InGame),
+                OnEnter(AppState::InGame),
                 spawn::setup_player.in_set(PlayerSet),
             )
             // Cleanup
             .add_systems(
-                OnExit(GameState::InGame),
+                OnExit(AppState::InGame),
                 (spawn::cleanup_player, bullet::cleanup_bullets).in_set(PlayerSet),
             )
             // Update
@@ -36,8 +36,8 @@ impl Plugin for PlayerPlugin {
                     bullet::check_bullet_collision.after(bullet::update_bullets),
                 )
                     .in_set(PlayerSet)
-                    .run_if(in_state(GameState::InGame))
-                    .run_if(in_state(PauseState::Running)),
+                    .run_if(in_state(AppState::InGame))
+                    .run_if(in_state(GameState::Running)),
             );
     }
 }

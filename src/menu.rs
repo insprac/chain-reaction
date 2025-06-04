@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::GameState;
+use crate::AppState;
 
 const NORMAL_BUTTON: Color = Color::srgb(1.0, 1.0, 1.0);
 const HOVERED_BUTTON: Color = Color::srgb(0.0, 0.63, 1.0);
@@ -10,9 +10,9 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
-            .add_systems(OnExit(GameState::Menu), cleanup_menu)
-            .add_systems(Update, button_interaction.run_if(in_state(GameState::Menu)));
+        app.add_systems(OnEnter(AppState::Menu), setup_menu)
+            .add_systems(OnExit(AppState::Menu), cleanup_menu)
+            .add_systems(Update, button_interaction.run_if(in_state(AppState::Menu)));
     }
 }
 
@@ -83,7 +83,7 @@ fn button_interaction(
 
                 match *menu_button {
                     MenuButton::Play => {
-                        commands.set_state(GameState::InGame);
+                        commands.set_state(AppState::InGame);
                     }
                     MenuButton::Exit => {
                         evw_app_exit.write(AppExit::Success);

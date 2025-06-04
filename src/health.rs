@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameState, PauseState};
+use crate::{AppState, GameState};
 
 pub struct HealthPlugin;
 
@@ -18,8 +18,8 @@ impl Plugin for HealthPlugin {
                         .after(apply_heal_event),
                 )
                     .in_set(HealthSet)
-                    .run_if(in_state(GameState::InGame))
-                    .run_if(in_state(PauseState::Running)),
+                    .run_if(in_state(AppState::InGame))
+                    .run_if(in_state(GameState::Running)),
             );
     }
 }
