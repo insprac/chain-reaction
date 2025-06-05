@@ -1,4 +1,7 @@
-use bevy::{prelude::*, render::render_resource::{AsBindGroup, ShaderRef}};
+use bevy::{
+    prelude::*,
+    render::render_resource::{AsBindGroup, ShaderRef},
+};
 
 pub struct MaterialsPlugin;
 
@@ -23,4 +26,3 @@ impl Material for BulletMaterial {
         AlphaMode::Blend
     }
 }
-

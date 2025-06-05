@@ -1,7 +1,10 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use crate::{
     AppState, GameState,
+    explosion::CreateExplosionCommand,
     game_assets::GameAssets,
     health::{DamageEvent, DiedEvent, Health},
     player::Player,
@@ -92,13 +95,28 @@ fn follow_and_self_destruct(
                 target: player_entity,
                 damage: 1,
             });
-            commands.entity(enemy_entity).despawn();
+            commands.entity(enemy_entity).trigger(DiedEvent {
+                entity: enemy_entity,
+            });
         }
     }
 
     Ok(())
 }
 
-fn despawn_on_death(trigger: Trigger<DiedEvent>, mut commands: Commands) {
+fn despawn_on_death(
+    trigger: Trigger<DiedEvent>,
+    mut commands: Commands,
+    q_transform: Query<&Transform>,
+) {
+    if let Ok(transform) = q_transform.get(trigger.entity) {
+        commands.queue(CreateExplosionCommand {
+            duration: Duration::from_millis(200),
+            position: transform.translation.xz(),
+            radius: 4.0,
+            strength: 50.0,
+            strength_multiplier: 0.1,
+        });
+    }
     commands.entity(trigger.entity).despawn();
 }
