@@ -2,12 +2,7 @@ use std::{f32::consts::PI, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::{
-    arena_index::{ArenaHex, OutOfBoundsEvent},
-    game_assets::GameAssets,
-};
-
-use super::bullet::PlayerBullet;
+use crate::player::bullet::CreateBulletCommand;
 
 #[derive(Component)]
 pub struct PlayerGun {
@@ -44,7 +39,6 @@ pub fn update_gun_cooldown(time: Res<Time>, mut q_gun: Query<&mut PlayerGun>) ->
 
 pub fn fire_gun(
     mut commands: Commands,
-    game_assets: Res<GameAssets>,
     mut q_gun: Query<(&mut PlayerGun, &Transform)>,
 ) -> Result {
     let (mut gun, gun_transform) = q_gun.single_mut()?;
@@ -57,22 +51,9 @@ pub fn fire_gun(
 
     let mut transform = Transform::from_translation(gun_transform.translation)
         .with_rotation(Quat::from_axis_angle(Vec3::Y, -PI / 2.0 + -gun.angle));
-    transform.translation = transform.translation + transform.forward().as_vec3();
+    transform.translation = transform.translation + transform.forward().as_vec3() * 1.5;
 
-    commands
-        .spawn((
-            PlayerBullet::default(),
-            Mesh3d(game_assets.player_bullet_mesh.clone()),
-            MeshMaterial3d(game_assets.player_bullet_material.clone()),
-            transform,
-            ArenaHex::default(),
-        ))
-        .observe(
-            |trigger: Trigger<OutOfBoundsEvent>, mut commands: Commands| {
-                // Despawn bullet when it goes out of arena bounds
-                commands.entity(trigger.target()).despawn();
-            },
-        );
+    commands.queue(CreateBulletCommand { transform });
 
     Ok(())
 }

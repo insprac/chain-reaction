@@ -1,13 +1,19 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::{enemy::Enemy, health::DamageEvent};
+use crate::{
+    arena_index::{ArenaHex, OutOfBoundsEvent},
+    enemy::Enemy,
+    game_assets::GameAssets,
+    health::DamageEvent,
+};
 
 const BULLET_SPEED: f32 = 30.0;
 const BULLET_LIFETIME_MILLIS: u64 = 500;
 const BULLET_HIT_RADIUS: f32 = 1.0;
 
 #[derive(Component)]
+#[require(ArenaHex)]
 pub struct PlayerBullet {
     damage: u16,
     timer: Timer,
@@ -17,8 +23,37 @@ impl Default for PlayerBullet {
     fn default() -> Self {
         PlayerBullet {
             damage: 1,
-            timer: Timer::new(Duration::from_millis(BULLET_LIFETIME_MILLIS), TimerMode::Once),
+            timer: Timer::new(
+                Duration::from_millis(BULLET_LIFETIME_MILLIS),
+                TimerMode::Once,
+            ),
         }
+    }
+}
+
+pub struct CreateBulletCommand {
+    pub transform: Transform,
+}
+
+impl Command for CreateBulletCommand {
+    fn apply(self, world: &mut World) {
+        let game_assets = world
+            .get_resource::<GameAssets>()
+            .expect("GameAssets isn't present during CreateBulletCommand");
+
+        world
+            .spawn((
+                PlayerBullet::default(),
+                Mesh3d(game_assets.player_bullet_mesh.clone()),
+                MeshMaterial3d(game_assets.player_bullet_material.clone()),
+                self.transform,
+            ))
+            .observe(
+                |trigger: Trigger<OutOfBoundsEvent>, mut commands: Commands| {
+                    // Despawn bullet when it goes out of arena bounds
+                    commands.entity(trigger.target()).despawn();
+                },
+            );
     }
 }
 
