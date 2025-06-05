@@ -1,15 +1,10 @@
-use bevy::{
-    asset::RenderAssetUsages,
-    input::common_conditions::input_just_pressed,
-    prelude::*,
-    render::mesh::{Indices, PrimitiveTopology},
-};
-use hexx::{ColumnMeshBuilder, EdgeDirection, Hex, HexLayout, PlaneMeshBuilder};
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use hexx::{EdgeDirection, Hex};
 
 use crate::{
     AppState, GameState,
     arena::Arena,
-    game_assets::{self, GameAssets},
+    game_assets::GameAssets,
     pointer_tracking::{PointerMovedEvent, PointerPosition},
 };
 
