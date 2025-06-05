@@ -19,6 +19,7 @@ impl Plugin for ArenaIndexPlugin {
                     .run_if(in_state(AppState::InGame))
                     .run_if(in_state(GameState::Running)),
             )
+            .add_observer(add_entity_to_index)
             .add_observer(remove_entity_from_index);
     }
 }
@@ -103,6 +104,26 @@ fn update_arena_hex_and_index(
     }
 }
 
+fn add_entity_to_index(
+    trigger: Trigger<OnAdd, ArenaHex>,
+    arena: Res<Arena>,
+    mut arena_index: ResMut<ArenaIndex>,
+    mut q_arena_hex: Query<(&mut ArenaHex, &Transform)>,
+) -> Result {
+    let (mut arena_hex, transform) = q_arena_hex.get_mut(trigger.target())?;
+
+    arena_hex.hex = arena.layout.world_pos_to_hex(transform.translation.xz());
+
+    let Some(index) = arena_index.index.get_mut(&arena_hex.hex) else {
+        warn!(hex=?arena_hex.hex, "ArenaHex entity was spawned outside the arena");
+        return Ok(());
+    };
+
+    index.push(trigger.target());
+
+    Ok(())
+}
+
 fn remove_entity_from_index(
     trigger: Trigger<OnRemove, ArenaHex>,
     mut arena_index: ResMut<ArenaIndex>,
@@ -112,7 +133,8 @@ fn remove_entity_from_index(
 
     // Try get the hex's index, this should always succeed
     let Some(index) = arena_index.index.get_mut(&arena_hex.hex) else {
-        error!(hex=?arena_hex.hex, "Tried removing ArenaHex from ArenaIndex, but hex wasn't found");
+        // This can happen if the entity was never outside the arena
+        warn!(hex=?arena_hex.hex, "Tried removing ArenaHex from ArenaIndex, but hex wasn't found");
         return Ok(());
     };
 

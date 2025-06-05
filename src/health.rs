@@ -64,7 +64,8 @@ pub struct HealEvent {
     pub heal: u16,
 }
 
-/// Emitted when health reaches 0.
+/// Triggered on an entity when health reaches 0.
+/// Other systems can also trigger this for the same downstream effects.
 #[derive(Event, Clone)]
 pub struct DiedEvent {
     pub entity: Entity,
