@@ -50,5 +50,5 @@ pub struct PlayerSet;
 pub struct Player;
 
 #[derive(Component)]
-#[require(Camera3d)]
+#[require(Camera3d, MeshPickingCamera)]
 pub struct PlayerCamera;

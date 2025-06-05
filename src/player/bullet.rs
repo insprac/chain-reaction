@@ -4,7 +4,7 @@ use std::time::Duration;
 use crate::{enemy::Enemy, health::DamageEvent};
 
 const BULLET_SPEED: f32 = 30.0;
-const BULLET_LIFETIME_SECS: u64 = 3;
+const BULLET_LIFETIME_MILLIS: u64 = 500;
 const BULLET_HIT_RADIUS: f32 = 1.0;
 
 #[derive(Component)]
@@ -17,7 +17,7 @@ impl Default for PlayerBullet {
     fn default() -> Self {
         PlayerBullet {
             damage: 1,
-            timer: Timer::new(Duration::from_secs(BULLET_LIFETIME_SECS), TimerMode::Once),
+            timer: Timer::new(Duration::from_millis(BULLET_LIFETIME_MILLIS), TimerMode::Once),
         }
     }
 }

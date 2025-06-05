@@ -68,7 +68,7 @@ fn setup_arena(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh_handle = meshes.add(hex_column_mesh(&arena.layout));
+    let mesh_handle = meshes.add(hex_column_mesh(&arena.layout, ARENA_COLUMN_HEIGHT));
     let material_handle = materials.add(StandardMaterial {
         base_color: Color::srgb(0.0, 0.0, 0.0),
         perceptual_roughness: 1.0,
@@ -129,11 +129,10 @@ fn move_column_with_force(
     }
 }
 
-fn hex_column_mesh(hex_layout: &HexLayout) -> Mesh {
-    let mesh_info = ColumnMeshBuilder::new(hex_layout, ARENA_COLUMN_HEIGHT)
+pub fn hex_column_mesh(hex_layout: &HexLayout, height: f32) -> Mesh {
+    let mesh_info = ColumnMeshBuilder::new(hex_layout, height)
         .without_bottom_face()
-        .with_offset(Vec3::new(0.0, -ARENA_COLUMN_HEIGHT, 0.0))
-        .center_aligned()
+        .with_offset(Vec3::new(0.0, -height, 0.0))
         .build();
 
     Mesh::new(
