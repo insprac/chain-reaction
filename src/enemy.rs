@@ -113,7 +113,7 @@ fn despawn_on_death(
         commands.queue(CreateExplosionCommand {
             duration: Duration::from_millis(200),
             position: transform.translation.xz(),
-            radius: 4.0,
+            radius: 5.0,
             strength: 50.0,
             strength_multiplier: 0.1,
         });

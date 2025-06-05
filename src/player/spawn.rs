@@ -41,10 +41,11 @@ pub fn setup_player(
             // Light
             (
                 PointLight {
-                    range: 30.0,
+                    range: 20.0,
+                    intensity: 3_000_000.0,
                     ..default()
                 },
-                Transform::from_xyz(0.0, 3.0, 0.0),
+                Transform::from_xyz(0.0, 5.0, 0.0),
             ),
         ],
     ));
