@@ -8,7 +8,8 @@ use hexx::{ColumnMeshBuilder, HexLayout, PlaneMeshBuilder};
 
 use crate::{
     arena::Arena,
-    materials::{BulletMaterial, TowerMaterial},
+    materials::{BulletMaterial, TowerMaterial, TowerPlaceholderMaterial},
+    tower::TowerKind,
 };
 
 pub struct GameAssetPlugin;
@@ -23,17 +24,43 @@ impl Plugin for GameAssetPlugin {
 pub struct GameAssets {
     pub enemy_mesh: Handle<Mesh>,
     pub enemy_material: Handle<StandardMaterial>,
+
     pub player_bullet_mesh: Handle<Mesh>,
     pub player_bullet_material: Handle<BulletMaterial>,
+
     pub hex_plane_mesh: Handle<Mesh>,
     pub hex_plane_material: Handle<StandardMaterial>,
-    pub tower_placeholder_mesh: Handle<Mesh>,
-    pub tower_placeholder_material: Handle<StandardMaterial>,
+
     pub tower_mesh: Handle<Mesh>,
-    pub tower_bullet2_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
-    pub tower_bullet3_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
-    pub tower_bullet4_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
-    pub tower_bullet6_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
+    pub tower_materials: TowerAssets<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
+
+    pub tower_placeholder_mesh: Handle<Mesh>,
+    pub tower_placeholder_materials: TowerAssets<TowerPlaceholderMaterial>,
+    pub tower_placeholder_empty_material: Handle<TowerPlaceholderMaterial>,
+}
+
+pub struct TowerAssets<T: Asset> {
+    pub bullet2: Handle<T>,
+    pub bullet3: Handle<T>,
+    pub bullet4: Handle<T>,
+    pub bullet6: Handle<T>,
+    pub explosion1: Handle<T>,
+    pub explosion2: Handle<T>,
+    pub explosion3: Handle<T>,
+}
+
+impl<T: Asset> TowerAssets<T> {
+    pub fn get(&self, kind: &TowerKind) -> Handle<T> {
+        match *kind {
+            TowerKind::Bullet2 => self.bullet2.clone(),
+            TowerKind::Bullet3 => self.bullet3.clone(),
+            TowerKind::Bullet4 => self.bullet4.clone(),
+            TowerKind::Bullet6 => self.bullet6.clone(),
+            TowerKind::Explosion1 => self.explosion1.clone(),
+            TowerKind::Explosion2 => self.explosion2.clone(),
+            TowerKind::Explosion3 => self.explosion3.clone(),
+        }
+    }
 }
 
 fn load_assets(
@@ -44,6 +71,7 @@ fn load_assets(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut bullet_materials: ResMut<Assets<BulletMaterial>>,
     mut tower_materials: ResMut<Assets<ExtendedMaterial<StandardMaterial, TowerMaterial>>>,
+    mut tower_placeholder_materials: ResMut<Assets<TowerPlaceholderMaterial>>,
 ) {
     let enemy_mesh = meshes.add(Cuboid::new(0.5, 0.3, 0.5));
     let enemy_material = materials.add(StandardMaterial {
@@ -66,12 +94,15 @@ fn load_assets(
         ..default()
     });
 
-    let tower_placeholder_mesh = meshes.add(build_tower_placeholder_mesh(&arena.layout));
-    let tower_placeholder_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.5, 0.5, 0.8),
-        unlit: true,
-        ..default()
-    });
+    // Tower images
+    let tower_empty_image: Handle<Image> = asset_server.load("textures/empty.png");
+    let tower_bullet2_image: Handle<Image> = asset_server.load("textures/bullet2.png");
+    let tower_bullet3_image: Handle<Image> = asset_server.load("textures/bullet3.png");
+    let tower_bullet4_image: Handle<Image> = asset_server.load("textures/bullet4.png");
+    let tower_bullet6_image: Handle<Image> = asset_server.load("textures/bullet6.png");
+    let tower_explosion1_image: Handle<Image> = asset_server.load("textures/explosion1.png");
+    let tower_explosion2_image: Handle<Image> = asset_server.load("textures/explosion2.png");
+    let tower_explosion3_image: Handle<Image> = asset_server.load("textures/explosion3.png");
 
     let tower_mesh = meshes.add(build_tower_mesh(&arena.layout));
     let base_tower_material = StandardMaterial {
@@ -79,34 +110,81 @@ fn load_assets(
         perceptual_roughness: 1.0,
         ..default()
     };
-    let tower_bullet2_image: Handle<Image> = asset_server.load("textures/bullet2.png");
-    let tower_bullet3_image: Handle<Image> = asset_server.load("textures/bullet3.png");
-    let tower_bullet4_image: Handle<Image> = asset_server.load("textures/bullet4.png");
-    let tower_bullet6_image: Handle<Image> = asset_server.load("textures/bullet6.png");
-    let tower_bullet2_material = tower_materials.add(ExtendedMaterial {
-        base: base_tower_material.clone(),
-        extension: TowerMaterial {
+
+    let tower_materials = TowerAssets {
+        bullet2: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_bullet2_image.clone(),
+            },
+        }),
+        bullet3: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_bullet3_image.clone(),
+            },
+        }),
+        bullet4: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_bullet4_image.clone(),
+            },
+        }),
+        bullet6: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_bullet6_image.clone(),
+            },
+        }),
+        explosion1: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_explosion1_image.clone(),
+            },
+        }),
+        explosion2: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material.clone(),
+            extension: TowerMaterial {
+                texture: tower_explosion2_image.clone(),
+            },
+        }),
+        explosion3: tower_materials.add(ExtendedMaterial {
+            base: base_tower_material,
+            extension: TowerMaterial {
+                texture: tower_explosion3_image.clone(),
+            },
+        }),
+    };
+
+    let tower_placeholder_mesh = meshes.add(build_tower_placeholder_mesh(&arena.layout));
+    let tower_placeholder_empty_material =
+        tower_placeholder_materials.add(TowerPlaceholderMaterial {
+            texture: tower_empty_image,
+        });
+
+    let tower_placeholder_materials = TowerAssets {
+        bullet2: tower_placeholder_materials.add(TowerPlaceholderMaterial {
             texture: tower_bullet2_image,
-        },
-    });
-    let tower_bullet3_material = tower_materials.add(ExtendedMaterial {
-        base: base_tower_material.clone(),
-        extension: TowerMaterial {
+        }),
+        bullet3: tower_placeholder_materials.add(TowerPlaceholderMaterial {
             texture: tower_bullet3_image,
-        },
-    });
-    let tower_bullet4_material = tower_materials.add(ExtendedMaterial {
-        base: base_tower_material.clone(),
-        extension: TowerMaterial {
+        }),
+        bullet4: tower_placeholder_materials.add(TowerPlaceholderMaterial {
             texture: tower_bullet4_image,
-        },
-    });
-    let tower_bullet6_material = tower_materials.add(ExtendedMaterial {
-        base: base_tower_material,
-        extension: TowerMaterial {
+        }),
+        bullet6: tower_placeholder_materials.add(TowerPlaceholderMaterial {
             texture: tower_bullet6_image,
-        },
-    });
+        }),
+        explosion1: tower_placeholder_materials.add(TowerPlaceholderMaterial {
+            texture: tower_explosion1_image,
+        }),
+        explosion2: tower_placeholder_materials.add(TowerPlaceholderMaterial {
+            texture: tower_explosion2_image,
+        }),
+        explosion3: tower_placeholder_materials.add(TowerPlaceholderMaterial {
+            texture: tower_explosion3_image,
+        }),
+    };
 
     commands.insert_resource(GameAssets {
         enemy_mesh,
@@ -115,13 +193,11 @@ fn load_assets(
         player_bullet_material,
         hex_plane_mesh,
         hex_plane_material,
-        tower_placeholder_mesh,
-        tower_placeholder_material,
         tower_mesh,
-        tower_bullet2_material,
-        tower_bullet3_material,
-        tower_bullet4_material,
-        tower_bullet6_material,
+        tower_materials,
+        tower_placeholder_mesh,
+        tower_placeholder_empty_material,
+        tower_placeholder_materials,
     });
 }
 

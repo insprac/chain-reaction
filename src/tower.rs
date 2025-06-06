@@ -41,6 +41,7 @@ pub enum TowerKind {
     Bullet6,
     Explosion1,
     Explosion2,
+    Explosion3,
 }
 
 impl TowerKind {
@@ -71,6 +72,7 @@ impl TowerKind {
             ],
             TowerKind::Explosion1 => vec![TowerAction::Explode(1)],
             TowerKind::Explosion2 => vec![TowerAction::Explode(2)],
+            TowerKind::Explosion3 => vec![TowerAction::Explode(3)],
         }
     }
 }
@@ -114,17 +116,9 @@ impl Command for PlaceTowerCommand {
 
         let (mesh_handle, material_handle) = {
             let game_assets = world.get_resource::<GameAssets>().unwrap();
-            let material = match self.tower.kind {
-                TowerKind::Bullet2 => game_assets.tower_bullet2_material.clone(),
-                TowerKind::Bullet3 => game_assets.tower_bullet3_material.clone(),
-                TowerKind::Bullet4 => game_assets.tower_bullet4_material.clone(),
-                TowerKind::Bullet6 => game_assets.tower_bullet6_material.clone(),
-                TowerKind::Explosion1 => game_assets.tower_bullet2_material.clone(),
-                TowerKind::Explosion2 => game_assets.tower_bullet2_material.clone(),
-            };
             (
                 game_assets.tower_mesh.clone(),
-                material,
+                game_assets.tower_materials.get(&self.tower.kind),
             )
         };
 

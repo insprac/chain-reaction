@@ -11,7 +11,8 @@ impl Plugin for MaterialsPlugin {
         app.add_plugins(MaterialPlugin::<BulletMaterial>::default())
             .add_plugins(MaterialPlugin::<
                 ExtendedMaterial<StandardMaterial, TowerMaterial>,
-            >::default());
+            >::default())
+            .add_plugins(MaterialPlugin::<TowerPlaceholderMaterial>::default());
     }
 }
 
@@ -41,5 +42,22 @@ pub struct TowerMaterial {
 impl MaterialExtension for TowerMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/tower.wgsl".into()
+    }
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct TowerPlaceholderMaterial {
+    #[texture(0, dimension = "2d")]
+    #[sampler(1)]
+    pub texture: Handle<Image>,
+}
+
+impl Material for TowerPlaceholderMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "shaders/tower_placeholder.wgsl".into()
+    }
+
+    fn alpha_mode(&self) -> AlphaMode {
+        AlphaMode::Blend
     }
 }

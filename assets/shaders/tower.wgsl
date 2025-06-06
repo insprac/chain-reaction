@@ -21,21 +21,15 @@ fn fragment(
     out.color = apply_pbr_lighting(pbr_input);
 
     if in.world_normal.y != 1.0 {
+        // This isn't the top face, so it's a side
         if in.uv.y > 0.9 {
+            // Draw a line along the top of the side
             out.color = HIGHLIGHT_COLOR;
         }
         return out;
     }
 
-    let scale = 1.0;
-    // Translate to center, scale, translate back
-    let scaled_uv = (in.uv - vec2(0.5)) * scale + vec2(0.5);
-    if (scaled_uv.x < 0.0 || scaled_uv.x > 1.0 || scaled_uv.y < 0.0 || scaled_uv.y > 1.0) {
-        // Outside the texture
-        return out;
-    }
-
-    let sample = textureSample(detail_texture, detail_texture_sampler, scaled_uv);
+    let sample = textureSample(detail_texture, detail_texture_sampler, in.uv);
     if sample.r > 0.5 {
         out.color = HIGHLIGHT_COLOR;
     }

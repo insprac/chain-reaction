@@ -6,6 +6,7 @@ use crate::{
     arena::Arena,
     arena_index::ArenaIndex,
     game_assets::GameAssets,
+    materials::TowerPlaceholderMaterial,
     pointer_tracking::{PointerChangedHexEvent, PointerPosition},
     tower::{PlaceTowerCommand, Tower, TowerKind},
 };
@@ -56,6 +57,14 @@ pub struct BuildingSettings {
     pub selected_tower: Option<usize>,
 }
 
+impl BuildingSettings {
+    pub fn get_selected(&self) -> Option<TowerKind> {
+        self.selected_tower
+            .map(|i| self.towers.get(i).map(Clone::clone))
+            .flatten()
+    }
+}
+
 impl Default for BuildingSettings {
     fn default() -> Self {
         BuildingSettings {
@@ -93,14 +102,21 @@ fn setup_building(
     arena: Res<Arena>,
     game_assets: Res<GameAssets>,
     pointer_pos: Res<PointerPosition>,
+    settings: Res<BuildingSettings>,
     mut evw_redraw_placement: EventWriter<RedrawBuildingEvent>,
 ) {
     let world_pos = arena.layout.hex_to_world_pos(pointer_pos.hex);
 
+    let material = if let Some(kind) = settings.get_selected() {
+        game_assets.tower_placeholder_materials.get(&kind)
+    } else {
+        game_assets.tower_placeholder_empty_material.clone()
+    };
+
     commands.spawn((
         BuildingPlaceholder,
         Mesh3d(game_assets.tower_placeholder_mesh.clone()),
-        MeshMaterial3d(game_assets.tower_placeholder_material.clone()),
+        MeshMaterial3d(material),
         Transform::from_xyz(world_pos.x, PLACEHOLDER_HEIGHT, world_pos.y),
     ));
 
@@ -159,10 +175,13 @@ fn place_building(
 }
 
 fn select_building(
+    mut commands: Commands,
     state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut settings: ResMut<BuildingSettings>,
     key_input: Res<ButtonInput<KeyCode>>,
+    game_assets: Res<GameAssets>,
+    q_placeholder: Query<Entity, With<BuildingPlaceholder>>,
 ) {
     let key_codes = [
         KeyCode::Digit1,
@@ -173,8 +192,19 @@ fn select_building(
     ];
 
     for (index, key_code) in key_codes.iter().enumerate() {
-        if !key_input.just_pressed(*key_code) || index >= settings.towers.len() {
+        if !key_input.just_pressed(*key_code) {
             continue;
+        }
+
+        let Some(kind) = settings.towers.get(index) else {
+            continue;
+        };
+
+        if let Ok(placeholder_id) = q_placeholder.single() {
+            let material = game_assets.tower_placeholder_materials.get(kind);
+            commands
+                .entity(placeholder_id)
+                .insert(MeshMaterial3d(material));
         }
 
         settings.selected_tower = Some(index);
