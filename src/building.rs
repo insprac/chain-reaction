@@ -2,7 +2,12 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use hexx::{EdgeDirection, Hex};
 
 use crate::{
-    arena::Arena, arena_index::ArenaIndex, game_assets::GameAssets, pointer_tracking::{PointerChangedHexEvent, PointerPosition}, tower::{PlaceTowerCommand, Tower, TowerKind}, AppState, GameState
+    AppState, GameState,
+    arena::Arena,
+    arena_index::ArenaIndex,
+    game_assets::GameAssets,
+    pointer_tracking::{PointerChangedHexEvent, PointerPosition},
+    tower::{PlaceTowerCommand, Tower, TowerKind},
 };
 
 const PLACEHOLDER_HEIGHT: f32 = 2.0;
@@ -54,7 +59,16 @@ pub struct BuildingSettings {
 impl Default for BuildingSettings {
     fn default() -> Self {
         BuildingSettings {
-            towers: vec![TowerKind::Bullet2, TowerKind::Bullet3],
+            towers: vec![
+                TowerKind::Bullet2,
+                TowerKind::Bullet3,
+                TowerKind::Bullet6,
+                TowerKind::Bullet6,
+                TowerKind::Bullet6,
+                TowerKind::Bullet6,
+                TowerKind::Bullet6,
+                TowerKind::Bullet6,
+            ],
             selected_tower: None,
         }
     }

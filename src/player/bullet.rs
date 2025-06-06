@@ -46,6 +46,9 @@ impl Command for SpawnPlayerBulletCommand {
             .get_resource::<GameAssets>()
             .expect("GameAssets isn't present during SpawnPlayerBulletCommand");
 
+        let mut transform = self.transform;
+        transform.translation.y = 0.5;
+
         world
             .spawn((
                 PlayerBullet {
@@ -54,7 +57,7 @@ impl Command for SpawnPlayerBulletCommand {
                 },
                 Mesh3d(game_assets.player_bullet_mesh.clone()),
                 MeshMaterial3d(game_assets.player_bullet_material.clone()),
-                self.transform,
+                transform,
             ))
             .observe(out_of_bounds_observer);
     }

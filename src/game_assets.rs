@@ -1,11 +1,15 @@
 use bevy::{
     asset::RenderAssetUsages,
+    pbr::ExtendedMaterial,
     prelude::*,
     render::mesh::{Indices, PrimitiveTopology},
 };
 use hexx::{ColumnMeshBuilder, HexLayout, PlaneMeshBuilder};
 
-use crate::{arena::Arena, materials::{BulletMaterial, TowerMaterial}};
+use crate::{
+    arena::Arena,
+    materials::{BulletMaterial, TowerMaterial},
+};
 
 pub struct GameAssetPlugin;
 
@@ -26,7 +30,10 @@ pub struct GameAssets {
     pub tower_placeholder_mesh: Handle<Mesh>,
     pub tower_placeholder_material: Handle<StandardMaterial>,
     pub tower_mesh: Handle<Mesh>,
-    pub tower_material: Handle<TowerMaterial>,
+    pub tower_bullet2_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
+    pub tower_bullet3_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
+    pub tower_bullet4_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
+    pub tower_bullet6_material: Handle<ExtendedMaterial<StandardMaterial, TowerMaterial>>,
 }
 
 fn load_assets(
@@ -36,7 +43,7 @@ fn load_assets(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut bullet_materials: ResMut<Assets<BulletMaterial>>,
-    mut tower_materials: ResMut<Assets<TowerMaterial>>,
+    mut tower_materials: ResMut<Assets<ExtendedMaterial<StandardMaterial, TowerMaterial>>>,
 ) {
     let enemy_mesh = meshes.add(Cuboid::new(0.5, 0.3, 0.5));
     let enemy_material = materials.add(StandardMaterial {
@@ -67,9 +74,38 @@ fn load_assets(
     });
 
     let tower_mesh = meshes.add(build_tower_mesh(&arena.layout));
+    let base_tower_material = StandardMaterial {
+        base_color: Color::srgb(0.0, 0.1, 0.0),
+        perceptual_roughness: 1.0,
+        ..default()
+    };
+    let tower_bullet2_image: Handle<Image> = asset_server.load("textures/bullet2.png");
+    let tower_bullet3_image: Handle<Image> = asset_server.load("textures/bullet3.png");
+    let tower_bullet4_image: Handle<Image> = asset_server.load("textures/bullet4.png");
     let tower_bullet6_image: Handle<Image> = asset_server.load("textures/bullet6.png");
-    let tower_material = tower_materials.add(TowerMaterial {
-        texture: tower_bullet6_image,
+    let tower_bullet2_material = tower_materials.add(ExtendedMaterial {
+        base: base_tower_material.clone(),
+        extension: TowerMaterial {
+            texture: tower_bullet2_image,
+        },
+    });
+    let tower_bullet3_material = tower_materials.add(ExtendedMaterial {
+        base: base_tower_material.clone(),
+        extension: TowerMaterial {
+            texture: tower_bullet3_image,
+        },
+    });
+    let tower_bullet4_material = tower_materials.add(ExtendedMaterial {
+        base: base_tower_material.clone(),
+        extension: TowerMaterial {
+            texture: tower_bullet4_image,
+        },
+    });
+    let tower_bullet6_material = tower_materials.add(ExtendedMaterial {
+        base: base_tower_material,
+        extension: TowerMaterial {
+            texture: tower_bullet6_image,
+        },
     });
 
     commands.insert_resource(GameAssets {
@@ -82,21 +118,23 @@ fn load_assets(
         tower_placeholder_mesh,
         tower_placeholder_material,
         tower_mesh,
-        tower_material,
+        tower_bullet2_material,
+        tower_bullet3_material,
+        tower_bullet4_material,
+        tower_bullet6_material,
     });
 }
 
 fn build_hex_plane(layout: &HexLayout) -> Mesh {
-    let mesh_info = PlaneMeshBuilder::new(layout).with_scale(Vec3::splat(0.9)).build();
+    let mesh_info = PlaneMeshBuilder::new(layout)
+        .with_scale(Vec3::splat(0.9))
+        .build();
 
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::all(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
-    .with_inserted_indices(Indices::U16(mesh_info.indices))
+    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::all())
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
+        .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
 pub fn build_tower_placeholder_mesh(hex_layout: &HexLayout) -> Mesh {
@@ -107,14 +145,11 @@ pub fn build_tower_placeholder_mesh(hex_layout: &HexLayout) -> Mesh {
         .with_scale(Vec3::new(0.9, 1.0, 0.9))
         .build();
 
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::all(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
-    .with_inserted_indices(Indices::U16(mesh_info.indices))
+    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::all())
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
+        .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
 pub fn build_tower_mesh(hex_layout: &HexLayout) -> Mesh {
@@ -124,12 +159,9 @@ pub fn build_tower_mesh(hex_layout: &HexLayout) -> Mesh {
         .with_scale(Vec3::new(0.8, 1.0, 0.8))
         .build();
 
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::all(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
-    .with_inserted_indices(Indices::U16(mesh_info.indices))
+    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::all())
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
+        .with_inserted_indices(Indices::U16(mesh_info.indices))
 }

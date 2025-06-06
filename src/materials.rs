@@ -1,4 +1,5 @@
 use bevy::{
+    pbr::{ExtendedMaterial, MaterialExtension},
     prelude::*,
     render::render_resource::{AsBindGroup, ShaderRef},
 };
@@ -8,7 +9,9 @@ pub struct MaterialsPlugin;
 impl Plugin for MaterialsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(MaterialPlugin::<BulletMaterial>::default())
-            .add_plugins(MaterialPlugin::<TowerMaterial>::default());
+            .add_plugins(MaterialPlugin::<
+                ExtendedMaterial<StandardMaterial, TowerMaterial>,
+            >::default());
     }
 }
 
@@ -30,12 +33,12 @@ impl Material for BulletMaterial {
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct TowerMaterial {
-    #[texture(0, dimension = "2d")]
-    #[sampler(1)]
+    #[texture(100, dimension = "2d")]
+    #[sampler(101)]
     pub texture: Handle<Image>,
 }
 
-impl Material for TowerMaterial {
+impl MaterialExtension for TowerMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/tower.wgsl".into()
     }

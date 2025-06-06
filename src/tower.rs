@@ -114,9 +114,17 @@ impl Command for PlaceTowerCommand {
 
         let (mesh_handle, material_handle) = {
             let game_assets = world.get_resource::<GameAssets>().unwrap();
+            let material = match self.tower.kind {
+                TowerKind::Bullet2 => game_assets.tower_bullet2_material.clone(),
+                TowerKind::Bullet3 => game_assets.tower_bullet3_material.clone(),
+                TowerKind::Bullet4 => game_assets.tower_bullet4_material.clone(),
+                TowerKind::Bullet6 => game_assets.tower_bullet6_material.clone(),
+                TowerKind::Explosion1 => game_assets.tower_bullet2_material.clone(),
+                TowerKind::Explosion2 => game_assets.tower_bullet2_material.clone(),
+            };
             (
                 game_assets.tower_mesh.clone(),
-                game_assets.tower_material.clone(),
+                material,
             )
         };
 
