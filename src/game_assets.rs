@@ -23,8 +23,10 @@ pub struct GameAssets {
     pub player_bullet_material: Handle<BulletMaterial>,
     pub hex_plane_mesh: Handle<Mesh>,
     pub hex_plane_material: Handle<StandardMaterial>,
-    pub tower_placement_mesh: Handle<Mesh>,
-    pub tower_placement_material: Handle<StandardMaterial>,
+    pub tower_placeholder_mesh: Handle<Mesh>,
+    pub tower_placeholder_material: Handle<StandardMaterial>,
+    pub tower_mesh: Handle<Mesh>,
+    pub tower_material: Handle<StandardMaterial>,
 }
 
 fn load_assets(
@@ -57,10 +59,16 @@ fn load_assets(
         ..default()
     });
 
-    let tower_placement_mesh = meshes.add(build_hex_plane(&arena.layout));
-    let tower_placement_material = materials.add(StandardMaterial {
+    let tower_placeholder_mesh = meshes.add(build_tower_placeholder_mesh(&arena.layout));
+    let tower_placeholder_material = materials.add(StandardMaterial {
         base_color: Color::srgb(0.5, 0.5, 0.8),
         unlit: true,
+        ..default()
+    });
+
+    let tower_mesh = meshes.add(build_tower_mesh(&arena.layout));
+    let tower_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.5, 0.5, 0.8),
         ..default()
     });
 
@@ -71,8 +79,10 @@ fn load_assets(
         player_bullet_material,
         hex_plane_mesh,
         hex_plane_material,
-        tower_placement_mesh,
-        tower_placement_material,
+        tower_placeholder_mesh,
+        tower_placeholder_material,
+        tower_mesh,
+        tower_material,
     });
 }
 
@@ -89,12 +99,29 @@ fn build_hex_plane(layout: &HexLayout) -> Mesh {
     .with_inserted_indices(Indices::U16(mesh_info.indices))
 }
 
-pub fn build_tower_placement_mesh(hex_layout: &HexLayout) -> Mesh {
+pub fn build_tower_placeholder_mesh(hex_layout: &HexLayout) -> Mesh {
     let height = 2.0;
     let mesh_info = ColumnMeshBuilder::new(hex_layout, height)
         .without_bottom_face()
         .with_offset(Vec3::new(0.0, -height, 0.0))
         .with_scale(Vec3::new(0.9, 1.0, 0.9))
+        .build();
+
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::all(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, mesh_info.vertices)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, mesh_info.normals)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, mesh_info.uvs)
+    .with_inserted_indices(Indices::U16(mesh_info.indices))
+}
+
+pub fn build_tower_mesh(hex_layout: &HexLayout) -> Mesh {
+    let height = 2.0;
+    let mesh_info = ColumnMeshBuilder::new(hex_layout, height)
+        .without_bottom_face()
+        .with_scale(Vec3::new(0.8, 1.0, 0.8))
         .build();
 
     Mesh::new(

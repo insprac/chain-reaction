@@ -17,6 +17,7 @@ mod tower;
 mod waves;
 mod pointer_tracking;
 mod explosion;
+mod building;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -29,7 +30,7 @@ pub enum AppState {
 pub enum GameState {
     Running,
     Paused,
-    PlaceTower,
+    Building,
 }
 
 fn main() {
@@ -60,6 +61,7 @@ fn main() {
         .add_plugins(arena_index::ArenaIndexPlugin)
         .add_plugins(pointer_tracking::PointerTrackingPlugin)
         .add_plugins(tower::TowerPlugin)
+        .add_plugins(building::BuildingPlugin)
         .add_plugins(explosion::ExplosionPlugin)
         .run();
 }

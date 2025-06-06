@@ -28,9 +28,17 @@ impl Plugin for ArenaIndexPlugin {
 pub struct ArenaIndex {
     /// A map of hexes to all contained `ArenaHex` entities.
     pub index: HashMap<Hex, Vec<Entity>>,
+    /// A map of all towers placed.
+    pub tower_index: HashMap<Hex, Entity>,
     /// A map of hexes to their corresponding `Column` entity.
     /// This field is populated when the columns are spawned.
     pub column_index: HashMap<Hex, Entity>,
+}
+
+impl ArenaIndex {
+    pub fn is_occupied(&self, hex: &Hex) -> bool {
+        self.tower_index.contains_key(hex)
+    }
 }
 
 impl Default for ArenaIndex {
@@ -41,6 +49,7 @@ impl Default for ArenaIndex {
         Self {
             column_index: HashMap::with_capacity(index_iter.len()),
             index: HashMap::from_iter(index_iter),
+            tower_index: HashMap::new(),
         }
     }
 }
