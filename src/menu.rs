@@ -56,10 +56,10 @@ fn cleanup_menu(
     q_menu_camera: Query<Entity, With<MenuCamera>>,
 ) -> Result {
     let menu_entity = q_menu.single()?;
-    commands.entity(menu_entity).despawn();
+    commands.entity(menu_entity).try_despawn();
 
     let camera_entity = q_menu_camera.single()?;
-    commands.entity(camera_entity).despawn();
+    commands.entity(camera_entity).try_despawn();
 
     Ok(())
 }

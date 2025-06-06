@@ -5,7 +5,7 @@ use bevy::{
 };
 use hexx::{ColumnMeshBuilder, HexLayout, PlaneMeshBuilder};
 
-use crate::{arena::Arena, materials::BulletMaterial};
+use crate::{arena::Arena, materials::{BulletMaterial, TowerMaterial}};
 
 pub struct GameAssetPlugin;
 
@@ -26,17 +26,18 @@ pub struct GameAssets {
     pub tower_placeholder_mesh: Handle<Mesh>,
     pub tower_placeholder_material: Handle<StandardMaterial>,
     pub tower_mesh: Handle<Mesh>,
-    pub tower_material: Handle<StandardMaterial>,
+    pub tower_material: Handle<TowerMaterial>,
 }
 
 fn load_assets(
     mut commands: Commands,
     arena: Res<Arena>,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut bullet_materials: ResMut<Assets<BulletMaterial>>,
+    mut tower_materials: ResMut<Assets<TowerMaterial>>,
 ) {
-    // Enemy
     let enemy_mesh = meshes.add(Cuboid::new(0.5, 0.3, 0.5));
     let enemy_material = materials.add(StandardMaterial {
         base_color: Color::hsl(350.0, 1.0, 0.5),
@@ -45,7 +46,6 @@ fn load_assets(
         ..default()
     });
 
-    // Player bullet
     let player_bullet_mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::new(0.1, 1.0)));
     let player_bullet_material = bullet_materials.add(BulletMaterial {
         color: LinearRgba::new(0.2, 0.8, 0.2, 1.0),
@@ -67,9 +67,9 @@ fn load_assets(
     });
 
     let tower_mesh = meshes.add(build_tower_mesh(&arena.layout));
-    let tower_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.5, 0.5, 0.8),
-        ..default()
+    let tower_bullet6_image: Handle<Image> = asset_server.load("textures/bullet6.png");
+    let tower_material = tower_materials.add(TowerMaterial {
+        texture: tower_bullet6_image,
     });
 
     commands.insert_resource(GameAssets {

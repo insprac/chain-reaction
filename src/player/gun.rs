@@ -2,7 +2,7 @@ use std::{f32::consts::PI, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::player::bullet::CreateBulletCommand;
+use crate::player::bullet::SpawnPlayerBulletCommand;
 
 #[derive(Component)]
 pub struct PlayerGun {
@@ -53,7 +53,7 @@ pub fn fire_gun(
         .with_rotation(Quat::from_axis_angle(Vec3::Y, -PI / 2.0 + -gun.angle));
     transform.translation = transform.translation + transform.forward().as_vec3() * 1.5;
 
-    commands.queue(CreateBulletCommand { transform });
+    commands.queue(SpawnPlayerBulletCommand { transform, trigger_history: Vec::new() });
 
     Ok(())
 }

@@ -101,11 +101,11 @@ fn cleanup_building(
     q_highlight: Query<Entity, With<HighlightedHex>>,
 ) {
     for entity in q_graphic {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 
     for entity in q_highlight {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 
@@ -132,7 +132,7 @@ fn place_building(
         hex: pointer_pos.hex,
         tower: Tower {
             kind: tower_kind.clone(),
-            direction: EdgeDirection::FLAT_TOP,
+            rotation: 0,
         },
     });
 
@@ -183,7 +183,7 @@ fn redraw_placement(
 ) {
     // Remove existing highlights
     for entity in q_highlight {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 
     let world_pos = arena.layout.hex_to_world_pos(pointer_pos.hex);

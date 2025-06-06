@@ -61,7 +61,7 @@ impl Command for SpawnEnemyCommand {
             .spawn((
                 Enemy,
                 Health::new(1),
-                Transform::from_xyz(self.position.x, 0.0, self.position.y),
+                Transform::from_xyz(self.position.x, 1.0, self.position.y),
                 Mesh3d(mesh_handle.clone()),
                 MeshMaterial3d(material_handle.clone()),
             ))
@@ -71,7 +71,7 @@ impl Command for SpawnEnemyCommand {
 
 fn cleanup_enemies(mut commands: Commands, q_enemy: Query<Entity, With<Enemy>>) {
     for entity in q_enemy {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 
@@ -118,5 +118,5 @@ fn despawn_on_death(
             strength_multiplier: 0.1,
         });
     }
-    commands.entity(trigger.entity).despawn();
+    commands.entity(trigger.entity).try_despawn();
 }

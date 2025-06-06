@@ -60,7 +60,7 @@ fn update_explosion(
         explosion.timer.tick(time.delta());
 
         if explosion.timer.finished() {
-            commands.entity(entity).despawn();
+            commands.entity(entity).try_despawn();
             continue;
         }
 

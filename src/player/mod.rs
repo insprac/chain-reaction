@@ -5,6 +5,7 @@ mod gun;
 mod movement;
 mod spawn;
 
+pub use bullet::SpawnPlayerBulletCommand;
 pub use gun::PlayerGun;
 
 use crate::{AppState, GameState};
@@ -33,7 +34,8 @@ impl Plugin for PlayerPlugin {
                     gun::update_gun_cooldown,
                     gun::fire_gun.run_if(input_pressed(MouseButton::Left)),
                     bullet::update_bullets,
-                    bullet::check_bullet_collision.after(bullet::update_bullets),
+                    (bullet::check_enemy_collision, bullet::check_tower_collision)
+                        .after(bullet::update_bullets),
                 )
                     .in_set(PlayerSet)
                     .run_if(in_state(AppState::InGame))

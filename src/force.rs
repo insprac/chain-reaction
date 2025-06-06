@@ -77,7 +77,7 @@ pub struct IsForceApplied;
 
 fn cleanup_emitters(mut commands: Commands, q_emitters: Query<Entity, With<ForceEmitter>>) {
     for entity in q_emitters {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 

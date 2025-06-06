@@ -36,7 +36,7 @@ pub fn setup_player(
                     perceptual_roughness: 1.0,
                     ..default()
                 })),
-                Transform::from_xyz(0.0, 0.5, 0.0),
+                Transform::from_xyz(0.0, 1.0, 0.0),
             ),
             // Light
             (
@@ -53,6 +53,6 @@ pub fn setup_player(
 
 pub fn cleanup_player(mut commands: Commands, q_player: Query<Entity, With<Player>>) -> Result {
     let entity = q_player.single()?;
-    commands.entity(entity).despawn();
+    commands.entity(entity).try_despawn();
     Ok(())
 }

@@ -71,7 +71,7 @@ fn setup_menu(mut commands: Commands) {
 
 fn cleanup_menu(mut commands: Commands, q_menu: Query<Entity, With<PauseMenu>>) -> Result {
     let entity = q_menu.single()?;
-    commands.entity(entity).despawn();
+    commands.entity(entity).try_despawn();
     Ok(())
 }
 

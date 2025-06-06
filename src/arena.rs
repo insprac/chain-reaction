@@ -117,7 +117,7 @@ fn setup_arena(
 
 fn cleanup_arena(mut commands: Commands, q_arena_columns: Query<Entity, With<ArenaColumn>>) {
     for entity in q_arena_columns {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 
