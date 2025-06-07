@@ -22,6 +22,7 @@ impl Plugin for GameAssetPlugin {
 
 #[derive(Resource)]
 pub struct GameAssets {
+    pub audiowide_font: Handle<Font>,
     pub enemy_mesh: Handle<Mesh>,
     pub enemy_material: Handle<StandardMaterial>,
 
@@ -73,6 +74,7 @@ fn load_assets(
     mut tower_materials: ResMut<Assets<ExtendedMaterial<StandardMaterial, TowerMaterial>>>,
     mut tower_placeholder_materials: ResMut<Assets<TowerPlaceholderMaterial>>,
 ) {
+    let audiowide_font = asset_server.load("fonts/Audiowide-Regular.ttf");
     let enemy_mesh = meshes.add(Cuboid::new(0.5, 0.3, 0.5));
     let enemy_material = materials.add(StandardMaterial {
         base_color: Color::hsl(350.0, 1.0, 0.5),
@@ -187,6 +189,7 @@ fn load_assets(
     };
 
     commands.insert_resource(GameAssets {
+        audiowide_font,
         enemy_mesh,
         enemy_material,
         player_bullet_mesh,

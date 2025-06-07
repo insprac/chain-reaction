@@ -1,8 +1,7 @@
 use bevy::{prelude::*, text::FontWeight};
 
 use crate::{
-    AppState,
-    score::{ComboResetEvent, IncreaseScoreEvent, PlayerScore, ScoreSet},
+    game_assets::GameAssets, score::{ComboResetEvent, IncreaseScoreEvent, PlayerScore, ScoreSet}, AppState
 };
 
 pub struct ScoreUiPlugin;
@@ -29,7 +28,7 @@ pub struct ScoreText;
 #[derive(Component)]
 pub struct ComboText;
 
-fn setup_score_ui(mut commands: Commands) {
+fn setup_score_ui(mut commands: Commands, game_assets: Res<GameAssets>) {
     commands.spawn((
         ScoreUi,
         Node {
@@ -43,6 +42,7 @@ fn setup_score_ui(mut commands: Commands) {
                 ScoreText,
                 Text::new("0"),
                 TextFont {
+                    font: game_assets.audiowide_font.clone(),
                     font_size: 60.0,
                     ..default()
                 },
@@ -50,7 +50,9 @@ fn setup_score_ui(mut commands: Commands) {
             (
                 ComboText,
                 Text::new(""),
+                TextColor(Color::srgb(0.92, 0.68, 0.11)),
                 TextFont {
+                    font: game_assets.audiowide_font.clone(),
                     font_size: 30.0,
                     ..default()
                 }
