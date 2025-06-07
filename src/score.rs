@@ -41,7 +41,7 @@ impl Default for PlayerScore {
     fn default() -> Self {
         Self {
             score: 0,
-            combo: 1,
+            combo: 0,
             combo_timer: Timer::from_seconds(1.0, TimerMode::Once),
             largest_chain: 0,
         }
@@ -68,7 +68,7 @@ fn tick_combo(
 ) {
     player_score.combo_timer.tick(time.delta());
     if player_score.combo_timer.finished() {
-        player_score.combo = 1;
+        player_score.combo = 0;
         evw_combo_reset.write(ComboResetEvent);
     }
 }
@@ -80,8 +80,9 @@ fn increase_score(
     player_score.combo_timer.reset();
 
     for event in evr_increase_score.read() {
-        let chain = 1 + event.chain_length as u128;
-        player_score.score += event.score * chain * player_score.combo;
+        let chain_mult = 1 + event.chain_length as u128;
+        let combo_mult = player_score.combo.max(1);
+        player_score.score += event.score * chain_mult * combo_mult;
         player_score.combo += 1;
 
         if event.chain_length > player_score.largest_chain {
