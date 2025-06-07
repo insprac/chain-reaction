@@ -12,7 +12,8 @@ impl Plugin for MaterialsPlugin {
             .add_plugins(MaterialPlugin::<
                 ExtendedMaterial<StandardMaterial, TowerMaterial>,
             >::default())
-            .add_plugins(MaterialPlugin::<TowerPlaceholderMaterial>::default());
+            .add_plugins(MaterialPlugin::<TowerPlaceholderMaterial>::default())
+            .add_plugins(MaterialPlugin::<ExplodingRingMaterial>::default());
     }
 }
 
@@ -55,6 +56,28 @@ pub struct TowerPlaceholderMaterial {
 impl Material for TowerPlaceholderMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/tower_placeholder.wgsl".into()
+    }
+
+    fn alpha_mode(&self) -> AlphaMode {
+        AlphaMode::Blend
+    }
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct ExplodingRingMaterial {
+    #[uniform(0)]
+    pub color: LinearRgba,
+    /// Gets ticked every frame to update the texture animation.
+    #[uniform(1)]
+    pub time: f32,
+    /// The total duration of the duration, nothing is rendered past this point in time.
+    #[uniform(2)]
+    pub duration: f32,
+}
+
+impl Material for ExplodingRingMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "shaders/exploding_ring.wgsl".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

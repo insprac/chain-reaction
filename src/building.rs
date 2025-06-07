@@ -8,7 +8,7 @@ use crate::{
     game_assets::GameAssets,
     materials::TowerPlaceholderMaterial,
     pointer_tracking::{PointerChangedHexEvent, PointerPosition},
-    tower::{PlaceTowerCommand, Tower, TowerKind},
+    tower::{PlaceTowerCommand, Tower, TowerAction, TowerKind},
 };
 
 const PLACEHOLDER_HEIGHT: f32 = 2.0;
@@ -18,7 +18,7 @@ pub struct BuildingPlugin;
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<BuildingSettings>()
-            .add_event::<RedrawBuildingEvent>()
+            .add_event::<RedrawPlacementEvent>()
             .add_systems(OnEnter(GameState::Building), setup_building)
             .add_systems(OnExit(GameState::Building), cleanup_building)
             .add_systems(OnExit(AppState::InGame), cleanup_building)
@@ -35,7 +35,7 @@ impl Plugin for BuildingPlugin {
                     select_building,
                     place_building.run_if(input_just_pressed(MouseButton::Left)),
                     redraw_placement.run_if(
-                        on_event::<RedrawBuildingEvent>.or(on_event::<PointerChangedHexEvent>),
+                        on_event::<RedrawPlacementEvent>.or(on_event::<PointerChangedHexEvent>),
                     ),
                 )
                     .in_set(BuildingSet)
@@ -71,12 +71,11 @@ impl Default for BuildingSettings {
             towers: vec![
                 TowerKind::Bullet2,
                 TowerKind::Bullet3,
+                TowerKind::Bullet4,
                 TowerKind::Bullet6,
-                TowerKind::Bullet6,
-                TowerKind::Bullet6,
-                TowerKind::Bullet6,
-                TowerKind::Bullet6,
-                TowerKind::Bullet6,
+                TowerKind::Explosion1,
+                TowerKind::Explosion2,
+                TowerKind::Explosion3,
             ],
             selected_tower: None,
         }
@@ -93,9 +92,7 @@ pub struct HighlightedHex;
 
 /// Fired when the placeholder graphics need to be redrawn (the focused hex changed).
 #[derive(Event)]
-pub struct RedrawBuildingEvent {
-    pub hex: Hex,
-}
+pub struct RedrawPlacementEvent;
 
 fn setup_building(
     mut commands: Commands,
@@ -103,7 +100,7 @@ fn setup_building(
     game_assets: Res<GameAssets>,
     pointer_pos: Res<PointerPosition>,
     settings: Res<BuildingSettings>,
-    mut evw_redraw_placement: EventWriter<RedrawBuildingEvent>,
+    mut evw_redraw_placement: EventWriter<RedrawPlacementEvent>,
 ) {
     let world_pos = arena.layout.hex_to_world_pos(pointer_pos.hex);
 
@@ -120,9 +117,7 @@ fn setup_building(
         Transform::from_xyz(world_pos.x, PLACEHOLDER_HEIGHT, world_pos.y),
     ));
 
-    evw_redraw_placement.write(RedrawBuildingEvent {
-        hex: pointer_pos.hex,
-    });
+    evw_redraw_placement.write(RedrawPlacementEvent);
 }
 
 fn cleanup_building(
@@ -182,6 +177,7 @@ fn select_building(
     key_input: Res<ButtonInput<KeyCode>>,
     game_assets: Res<GameAssets>,
     q_placeholder: Query<Entity, With<BuildingPlaceholder>>,
+    mut evw_redraw_placement: EventWriter<RedrawPlacementEvent>,
 ) {
     let key_codes = [
         KeyCode::Digit1,
@@ -195,6 +191,8 @@ fn select_building(
         if !key_input.just_pressed(*key_code) {
             continue;
         }
+
+        evw_redraw_placement.write(RedrawPlacementEvent);
 
         let Some(kind) = settings.towers.get(index) else {
             continue;
@@ -222,6 +220,7 @@ fn redraw_placement(
     game_assets: Res<GameAssets>,
     arena: Res<Arena>,
     pointer_pos: Res<PointerPosition>,
+    settings: Res<BuildingSettings>,
     mut graphic_transform: Single<&mut Transform, With<BuildingPlaceholder>>,
     q_highlight: Query<Entity, With<HighlightedHex>>,
 ) {
@@ -233,18 +232,36 @@ fn redraw_placement(
     let world_pos = arena.layout.hex_to_world_pos(pointer_pos.hex);
     graphic_transform.translation = Vec3::new(world_pos.x, PLACEHOLDER_HEIGHT, world_pos.y);
 
-    // Spawn new highlights in all directions
-    for direction in EdgeDirection::ALL_DIRECTIONS {
-        let mut hex = pointer_pos.hex + direction;
-        while hex.unsigned_distance_to(Hex::ZERO) <= Arena::RADIUS {
-            let position = arena.layout.hex_to_world_pos(hex);
-            commands.spawn((
-                HighlightedHex,
-                Mesh3d(game_assets.hex_plane_mesh.clone()),
-                MeshMaterial3d(game_assets.hex_plane_material.clone()),
-                Transform::from_xyz(position.x, 0.1, position.y),
-            ));
-            hex += direction;
+    let Some(kind) = settings.get_selected() else {
+        return;
+    };
+
+    for action in kind.actions() {
+        match action {
+            TowerAction::Shoot(direction) => {
+                let mut hex = pointer_pos.hex + direction;
+                while hex.unsigned_distance_to(Hex::ZERO) <= Arena::RADIUS {
+                    commands.spawn(highlighted_hex_bundle(hex, &arena, &game_assets));
+                    hex += direction;
+                }
+            }
+            TowerAction::Explode(range) => {
+                for hex in pointer_pos.hex.range(range) {
+                    if hex.unsigned_distance_to(Hex::ZERO) <= Arena::RADIUS {
+                        commands.spawn(highlighted_hex_bundle(hex, &arena, &game_assets));
+                    }
+                }
+            }
         }
     }
+}
+
+fn highlighted_hex_bundle(hex: Hex, arena: &Arena, game_assets: &GameAssets) -> impl Bundle {
+    let position = arena.layout.hex_to_world_pos(hex);
+    (
+        HighlightedHex,
+        Mesh3d(game_assets.hex_plane_mesh.clone()),
+        MeshMaterial3d(game_assets.hex_plane_material.clone()),
+        Transform::from_xyz(position.x, 0.1, position.y),
+    )
 }

@@ -111,11 +111,11 @@ fn despawn_on_death(
 ) {
     if let Ok(transform) = q_transform.get(trigger.entity) {
         commands.queue(CreateExplosionCommand {
-            duration: Duration::from_millis(300),
+            duration: Duration::from_millis(600),
             position: transform.translation.xz(),
             radius: 5.0,
             strength: 50.0,
-            strength_multiplier: 0.1,
+            strength_modifier: -100.0,
         });
     }
     commands.entity(trigger.entity).try_despawn();

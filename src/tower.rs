@@ -45,7 +45,7 @@ pub enum TowerKind {
 }
 
 impl TowerKind {
-    fn actions(&self) -> Vec<TowerAction> {
+    pub fn actions(&self) -> Vec<TowerAction> {
         match *self {
             TowerKind::Bullet2 => vec![
                 TowerAction::Shoot(EdgeDirection::FLAT_TOP),
@@ -86,9 +86,9 @@ pub struct TriggerTowerEvent {
     pub trigger_history: Vec<Entity>,
 }
 
-enum TowerAction {
+pub enum TowerAction {
     Shoot(EdgeDirection),
-    Explode(usize),
+    Explode(u32),
 }
 
 pub struct PlaceTowerCommand {

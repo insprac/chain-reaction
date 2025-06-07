@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::{AppState, GameState, force::ForceEmitter};
+use crate::{AppState, GameState, force::ForceEmitter, materials::ExplodingRingMaterial};
 
 pub struct ExplosionPlugin;
 
@@ -10,7 +10,7 @@ impl Plugin for ExplosionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            update_explosion
+            (update_explosion, update_material_times)
                 .run_if(in_state(AppState::InGame))
                 .run_if(in_state(GameState::Running)),
         );
@@ -22,9 +22,8 @@ impl Plugin for ExplosionPlugin {
 pub struct Explosion {
     /// The time until this entity is removed.
     pub timer: Timer,
-    /// Force strength is multiplied by this value over time (less than 1.0 reduces over time, more
-    /// than 1.0 increases over time).
-    pub strength_multiplier: f32,
+    /// Force strength changes by this modifier each second.
+    pub strength_modifier: f32,
 }
 
 pub struct CreateExplosionCommand {
@@ -32,21 +31,38 @@ pub struct CreateExplosionCommand {
     pub position: Vec2,
     pub radius: f32,
     pub strength: f32,
-    pub strength_multiplier: f32,
+    pub strength_modifier: f32,
 }
 
 impl Command for CreateExplosionCommand {
     fn apply(self, world: &mut World) -> () {
+        let mesh_handle = {
+            let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
+            meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(self.radius)))
+        };
+        let material_handle = {
+            let mut materials = world
+                .get_resource_mut::<Assets<ExplodingRingMaterial>>()
+                .unwrap();
+            materials.add(ExplodingRingMaterial {
+                color: LinearRgba::new(1.0, 0.0, 0.0, 1.0),
+                time: 0.0,
+                duration: self.duration.as_secs_f32(),
+            })
+        };
+
         world.spawn((
             Explosion {
                 timer: Timer::new(self.duration, TimerMode::Once),
-                strength_multiplier: self.strength_multiplier,
+                strength_modifier: self.strength_modifier,
             },
             ForceEmitter {
                 strength: self.strength,
                 radius: self.radius,
             },
-            Transform::from_xyz(self.position.x, 0.0, self.position.y),
+            Transform::from_xyz(self.position.x, 0.5, self.position.y),
+            Mesh3d(mesh_handle),
+            MeshMaterial3d(material_handle),
         ));
     }
 }
@@ -64,9 +80,15 @@ fn update_explosion(
             continue;
         }
 
-        if explosion.strength_multiplier != 1.0 {
-            let adjust = emitter.strength * explosion.strength_multiplier - emitter.strength;
-            emitter.strength += adjust * time.delta_secs();
+        emitter.strength += explosion.strength_modifier * time.delta_secs();
+        if emitter.strength < 0.0 {
+            emitter.strength = 0.0;
         }
+    }
+}
+
+fn update_material_times(mut materials: ResMut<Assets<ExplodingRingMaterial>>, time: Res<Time>) {
+    for (_id, material) in materials.iter_mut() {
+        material.time += time.delta_secs();
     }
 }

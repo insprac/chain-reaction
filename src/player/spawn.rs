@@ -32,7 +32,7 @@ pub fn setup_player(
             (
                 Mesh3d(meshes.add(Cylinder::new(0.5, 0.2))),
                 MeshMaterial3d(materials.add(StandardMaterial {
-                    base_color: Color::hsl(100.0, 0.7, 0.5),
+                    base_color: Color::hsl(100.0, 0.7, 0.3),
                     perceptual_roughness: 1.0,
                     ..default()
                 })),
@@ -41,8 +41,8 @@ pub fn setup_player(
             // Light
             (
                 PointLight {
-                    range: 20.0,
-                    intensity: 3_000_000.0,
+                    range: 40.0,
+                    intensity: 10_000_000.0,
                     ..default()
                 },
                 Transform::from_xyz(0.0, 5.0, 0.0),
