@@ -8,7 +8,7 @@ mod spawn;
 pub use bullet::SpawnPlayerBulletCommand;
 pub use gun::PlayerGun;
 
-use crate::{AppState, GameState};
+use crate::{AppState, GameState, PlayerTeam, arena_index::ArenaHex};
 
 pub struct PlayerPlugin;
 
@@ -48,7 +48,7 @@ impl Plugin for PlayerPlugin {
 pub struct PlayerSet;
 
 #[derive(Component)]
-#[require(Transform, Visibility)]
+#[require(PlayerTeam, ArenaHex, Transform, Visibility)]
 pub struct Player;
 
 #[derive(Component)]

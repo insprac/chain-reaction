@@ -3,8 +3,9 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    AppState, GameState,
-    explosion::CreateExplosionCommand,
+    AppState, EnemyTeam, GameState, Team,
+    arena_index::ArenaHex,
+    explosion::{CreateExplosionCommand, ExplosionDamageArea},
     game_assets::GameAssets,
     health::{DamageEvent, DiedEvent, Health},
     player::Player,
@@ -32,7 +33,7 @@ impl Plugin for EnemyPlugin {
 pub struct EnemySet;
 
 #[derive(Component)]
-#[require(Transform, Visibility)]
+#[require(EnemyTeam, ArenaHex, Transform, Visibility)]
 pub struct Enemy;
 
 pub struct SpawnEnemyCommand {
@@ -76,7 +77,6 @@ fn cleanup_enemies(mut commands: Commands, q_enemy: Query<Entity, With<Enemy>>) 
 }
 
 fn follow_and_self_destruct(
-    mut commands: Commands,
     mut evw_damage: EventWriter<DamageEvent>,
     time: Res<Time>,
     q_player: Query<(Entity, &Transform), (With<Player>, Without<Enemy>)>,
@@ -95,8 +95,9 @@ fn follow_and_self_destruct(
                 target: player_entity,
                 damage: 1,
             });
-            commands.entity(enemy_entity).trigger(DiedEvent {
-                entity: enemy_entity,
+            evw_damage.write(DamageEvent {
+                target: enemy_entity,
+                damage: 100,
             });
         }
     }
@@ -111,11 +112,17 @@ fn despawn_on_death(
 ) {
     if let Ok(transform) = q_transform.get(trigger.entity) {
         commands.queue(CreateExplosionCommand {
+            team: Team::Enemy,
+            color: LinearRgba::new(1.0, 0.0, 0.0, 1.0),
             duration: Duration::from_millis(600),
             position: transform.translation.xz(),
+            damage: 1,
+            damage_area: ExplosionDamageArea::Radius(1.0),
+            damage_delay: Duration::from_millis(200),
             radius: 5.0,
             strength: 50.0,
             strength_modifier: -100.0,
+            trigger_history: Vec::new(),
         });
     }
     commands.entity(trigger.entity).try_despawn();

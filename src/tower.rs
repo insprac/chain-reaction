@@ -1,10 +1,14 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 use bevy::prelude::*;
 use hexx::{EdgeDirection, Hex};
 
 use crate::{
-    AppState, GameState, arena::Arena, arena_index::ArenaIndex, game_assets::GameAssets,
+    AppState, GameState, Team,
+    arena::Arena,
+    arena_index::ArenaIndex,
+    explosion::{CreateExplosionCommand, ExplosionDamageArea},
+    game_assets::GameAssets,
     player::SpawnPlayerBulletCommand,
 };
 
@@ -16,6 +20,7 @@ impl Plugin for TowerPlugin {
             Update,
             trigger_towers
                 .in_set(TowerSet)
+                .run_if(on_event::<TriggerTowerEvent>)
                 .run_if(in_state(AppState::InGame))
                 .run_if(in_state(GameState::Running)),
         );
@@ -144,6 +149,10 @@ fn trigger_towers(
     q_tower: Query<(&Tower, &Transform)>,
 ) {
     for event in evr_trigger_tower.read() {
+        if event.trigger_history.contains(&event.target) {
+            continue;
+        }
+
         let Ok((tower, tower_transform)) = q_tower.get(event.target) else {
             warn!(tower_id=?event.target, "Tower triggered targeting an entity that is not a tower");
             continue;
@@ -156,19 +165,30 @@ fn trigger_towers(
             match action {
                 TowerAction::Shoot(direction) => {
                     let direction = direction >> tower.rotation;
-                    let transform = Transform::from_translation(tower_transform.translation)
-                        .with_rotation(Quat::from_axis_angle(
-                            Vec3::Y,
-                            direction.angle_flat() + PI / 2.0,
-                        ));
+                    let transform =
+                        Transform::from_translation(tower_transform.translation).with_rotation(
+                            Quat::from_axis_angle(Vec3::Y, direction.angle_flat() + PI / 2.0),
+                        );
 
                     commands.queue(SpawnPlayerBulletCommand {
                         transform,
                         trigger_history: trigger_history.clone(),
                     });
                 }
-                TowerAction::Explode(radius) => {
-                    unimplemented!()
+                TowerAction::Explode(range) => {
+                    commands.queue(CreateExplosionCommand {
+                        team: Team::Player,
+                        color: LinearRgba::new(0.2, 1.0, 0.2, 1.0),
+                        duration: Duration::from_millis(500),
+                        damage: 1,
+                        damage_area: ExplosionDamageArea::Hex(range),
+                        damage_delay: Duration::from_millis(100),
+                        radius: 1.0 + range as f32 * 1.5,
+                        position: tower_transform.translation.xz(),
+                        strength: 50.0,
+                        strength_modifier: -100.0,
+                        trigger_history: trigger_history.clone(),
+                    });
                 }
             }
         }

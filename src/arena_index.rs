@@ -39,6 +39,18 @@ impl ArenaIndex {
     pub fn is_occupied(&self, hex: &Hex) -> bool {
         self.tower_index.contains_key(hex)
     }
+
+    pub fn get_many_index(&self, hexes: impl Iterator<Item = Hex>) -> Vec<Entity> {
+        hexes
+            .map(|hex| {
+                self.index
+                    .get(&hex)
+                    .map(|ids| ids.clone())
+                    .unwrap_or(vec![])
+            })
+            .flatten()
+            .collect()
+    }
 }
 
 impl Default for ArenaIndex {

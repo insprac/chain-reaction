@@ -1,11 +1,14 @@
 use bevy::{
-    picking::mesh_picking::{ray_cast::RayCastVisibility, MeshPickingPlugin, MeshPickingSettings},
+    ecs::component::Component,
+    picking::mesh_picking::{MeshPickingPlugin, MeshPickingSettings, ray_cast::RayCastVisibility},
     prelude::{App, AppExtStates, ClearColor, Color, DefaultPlugins, States},
 };
 
 mod arena;
 mod arena_index;
+mod building;
 mod enemy;
+mod explosion;
 mod force;
 mod game_assets;
 mod health;
@@ -13,11 +16,9 @@ mod materials;
 mod menu;
 mod pause;
 mod player;
+mod pointer_tracking;
 mod tower;
 mod waves;
-mod pointer_tracking;
-mod explosion;
-mod building;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -32,6 +33,18 @@ pub enum GameState {
     Paused,
     Building,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Team {
+    Player,
+    Enemy,
+}
+
+#[derive(Component, Default)]
+pub struct PlayerTeam;
+
+#[derive(Component, Default)]
+pub struct EnemyTeam;
 
 fn main() {
     App::new()

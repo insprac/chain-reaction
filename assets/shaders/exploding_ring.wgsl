@@ -18,7 +18,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let dist = length(uv);
 
     // Ring radius expands over time
-    let radius = scaled_time * 1.5;
+    let radius = scaled_time * 1.2;
 
     // Ring thickness, gets thinner as it expands
     let ring_width = 0.3 * (1.0 - scaled_time);
