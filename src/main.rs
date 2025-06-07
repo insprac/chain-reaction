@@ -19,6 +19,7 @@ mod player;
 mod pointer_tracking;
 mod tower;
 mod waves;
+mod score;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -76,5 +77,6 @@ fn main() {
         .add_plugins(tower::TowerPlugin)
         .add_plugins(building::BuildingPlugin)
         .add_plugins(explosion::ExplosionPlugin)
+        .add_plugins(score::ScorePlugin)
         .run();
 }

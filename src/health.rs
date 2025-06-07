@@ -55,6 +55,7 @@ impl Health {
 pub struct DamageEvent {
     pub target: Entity,
     pub damage: u16,
+    pub chain_length: usize,
 }
 
 /// Emit to heal a unit's health.
@@ -69,6 +70,7 @@ pub struct HealEvent {
 #[derive(Event, Clone)]
 pub struct DiedEvent {
     pub entity: Entity,
+    pub chain_length: usize,
 }
 
 fn apply_damage_event(
@@ -92,6 +94,7 @@ fn apply_damage_event(
             health.current = 0;
             let died_event = DiedEvent {
                 entity: event.target,
+                chain_length: event.chain_length,
             };
             evw_died.write(died_event.clone());
             commands.entity(event.target).trigger(died_event);

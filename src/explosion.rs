@@ -3,7 +3,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    arena::Arena, arena_index::ArenaIndex, force::ForceEmitter, health::{DamageEvent, Health}, materials::ExplodingRingMaterial, tower::TriggerTowerEvent, AppState, EnemyTeam, GameState, PlayerTeam, Team
+    AppState, EnemyTeam, GameState, PlayerTeam, Team,
+    arena::Arena,
+    arena_index::ArenaIndex,
+    force::ForceEmitter,
+    health::{DamageEvent, Health},
+    materials::ExplodingRingMaterial,
+    tower::TriggerTowerEvent,
 };
 
 pub struct ExplosionPlugin;
@@ -183,6 +189,7 @@ fn apply_explosion_damage(
             evw_damage.write(DamageEvent {
                 target: target_id,
                 damage: explosion.damage,
+                chain_length: explosion.trigger_history.len(),
             });
         }
     }

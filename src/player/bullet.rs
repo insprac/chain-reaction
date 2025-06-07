@@ -104,6 +104,7 @@ pub fn check_enemy_collision(
                 evw_damage.write(DamageEvent {
                     target: enemy_entity,
                     damage: bullet.damage,
+                    chain_length: bullet.trigger_history.len(),
                 });
                 commands.entity(bullet_entity).try_despawn();
                 break;

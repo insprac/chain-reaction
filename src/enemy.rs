@@ -9,6 +9,7 @@ use crate::{
     game_assets::GameAssets,
     health::{DamageEvent, DiedEvent, Health},
     player::Player,
+    score::IncreaseScoreEvent,
 };
 
 const MOVE_SPEED: f32 = 5.0;
@@ -94,10 +95,12 @@ fn follow_and_self_destruct(
             evw_damage.write(DamageEvent {
                 target: player_entity,
                 damage: 1,
+                chain_length: 0,
             });
             evw_damage.write(DamageEvent {
                 target: enemy_entity,
                 damage: 100,
+                chain_length: 0,
             });
         }
     }
@@ -108,8 +111,14 @@ fn follow_and_self_destruct(
 fn despawn_on_death(
     trigger: Trigger<DiedEvent>,
     mut commands: Commands,
+    mut evw_increase_score: EventWriter<IncreaseScoreEvent>,
     q_transform: Query<&Transform>,
 ) {
+    evw_increase_score.write(IncreaseScoreEvent {
+        score: 1,
+        chain_length: trigger.chain_length,
+    });
+
     if let Ok(transform) = q_transform.get(trigger.entity) {
         commands.queue(CreateExplosionCommand {
             team: Team::Enemy,
@@ -125,5 +134,6 @@ fn despawn_on_death(
             trigger_history: Vec::new(),
         });
     }
+
     commands.entity(trigger.entity).try_despawn();
 }
