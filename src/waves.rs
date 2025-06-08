@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use hexx::Hex;
+use rand::seq::IndexedRandom;
 
 use crate::{
     AppState, GameState,
     arena::Arena,
     enemy::{Enemy, EnemySet, SpawnEnemyCommand},
+    tower::TowerKind,
 };
 
 pub const WAVES: &[Wave] = &[
@@ -24,6 +26,14 @@ pub const WAVES: &[Wave] = &[
                 remaining_threshold: 2,
             },
         ],
+        reward: WaveReward {
+            options: 1,
+            pool: &[
+                TowerKind::Bullet2,
+                TowerKind::Bullet3,
+                TowerKind::Explosion1,
+            ],
+        },
     },
 
     // Wave 2
@@ -46,6 +56,15 @@ pub const WAVES: &[Wave] = &[
                 remaining_threshold: 6,
             },
         ],
+        reward: WaveReward {
+            options: 2,
+            pool: &[
+                TowerKind::Bullet2,
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Explosion1,
+            ],
+        },
     },
 
     // Wave 3
@@ -68,8 +87,16 @@ pub const WAVES: &[Wave] = &[
                 remaining_threshold: 10,
             },
         ],
+        reward: WaveReward {
+            options: 2,
+            pool: &[
+                TowerKind::Bullet2,
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Explosion1,
+            ],
+        },
     },
-
     // Wave 4
     Wave {
         stages: &[
@@ -94,8 +121,17 @@ pub const WAVES: &[Wave] = &[
                 remaining_threshold: 12,
             },
         ],
+        reward: WaveReward {
+            options: 2,
+            pool: &[
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Bullet6,
+                TowerKind::Explosion1,
+                TowerKind::Explosion2,
+            ],
+        },
     },
-
     // Wave 5
     Wave {
         stages: &[
@@ -120,12 +156,22 @@ pub const WAVES: &[Wave] = &[
                 remaining_threshold: 18,
             },
         ],
+        reward: WaveReward {
+            options: 3,
+            pool: &[
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Bullet6,
+                TowerKind::Explosion2,
+                TowerKind::Explosion3,
+            ],
+        },
     },
-
 ];
 
 pub struct Wave {
     pub stages: &'static [WaveStage],
+    pub reward: WaveReward,
 }
 
 pub struct WaveStage {
@@ -133,6 +179,23 @@ pub struct WaveStage {
     pub enemies: usize,
     /// Enemies wont spawn until there is at most this many enemies remaining.
     pub remaining_threshold: usize,
+}
+
+pub struct WaveReward {
+    /// The number of options that will appear for the player to select from.
+    pub options: usize,
+    /// Rewards will be randomly selected from this pool.
+    pub pool: &'static [TowerKind],
+}
+
+impl WaveReward {
+    pub fn get_random_options(&self) -> Vec<TowerKind> {
+        let mut rng = rand::rng();
+        self.pool
+            .choose_multiple(&mut rng, self.options)
+            .map(Clone::clone)
+            .collect()
+    }
 }
 
 pub struct WavePlugin;
@@ -143,6 +206,13 @@ impl Plugin for WavePlugin {
             .add_event::<WaveStartedEvent>()
             .add_event::<WaveStageStartedEvent>()
             .add_systems(OnEnter(AppState::InGame), setup_waves.in_set(EnemySet))
+            .add_systems(
+                OnTransition {
+                    exited: GameState::RewardSelect,
+                    entered: GameState::Running,
+                },
+                next_wave,
+            )
             .add_systems(
                 Update,
                 (
@@ -181,6 +251,10 @@ impl WaveManager {
     /// The display value of the wave stage starting from 1.
     pub fn stage_display(&self) -> usize {
         self.stage + 1
+    }
+
+    pub fn wave_reward(&self) -> &'static WaveReward {
+        &WAVES[self.wave].reward
     }
 }
 
@@ -233,8 +307,8 @@ fn spawn_stage(mut commands: Commands, arena: Res<Arena>, wave_manager: Res<Wave
 
 fn update_wave_progress(
     time: Res<Time>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut wave_manager: ResMut<WaveManager>,
-    mut evw_wave_started: EventWriter<WaveStartedEvent>,
     mut evw_wave_stage_started: EventWriter<WaveStageStartedEvent>,
     q_enemies: Query<Entity, With<Enemy>>,
 ) {
@@ -253,24 +327,15 @@ fn update_wave_progress(
         if remaining_enemies > 0 {
             return;
         }
+
         if WAVES.len() <= wave_manager.wave + 1 {
             // There are no more waves
             // TODO replace with a victory state
             info!("Victory!");
             return;
         }
-        wave_manager.wave += 1;
-        wave_manager.stage = 0;
 
-        info!(wave=wave_manager.wave_display(), "Wave started");
-
-        evw_wave_started.write(WaveStartedEvent {
-            wave: wave_manager.wave_display(),
-        });
-        evw_wave_stage_started.write(WaveStageStartedEvent {
-            wave: wave_manager.wave_display(),
-            stage: wave_manager.stage_display(),
-        });
+        next_game_state.set(GameState::RewardSelect);
     } else {
         // There are stages remaining
         let stage = &wave.stages[wave_manager.stage];
@@ -279,11 +344,26 @@ fn update_wave_progress(
         }
         wave_manager.stage += 1;
 
-        info!(stage=wave_manager.stage_display(), "Stage started");
-
         evw_wave_stage_started.write(WaveStageStartedEvent {
             wave: wave_manager.wave_display(),
             stage: wave_manager.stage_display(),
         });
     }
+}
+
+fn next_wave(
+    mut wave_manager: ResMut<WaveManager>,
+    mut evw_wave_started: EventWriter<WaveStartedEvent>,
+    mut evw_wave_stage_started: EventWriter<WaveStageStartedEvent>,
+) {
+    wave_manager.wave += 1;
+    wave_manager.stage = 0;
+
+    evw_wave_started.write(WaveStartedEvent {
+        wave: wave_manager.wave_display(),
+    });
+    evw_wave_stage_started.write(WaveStageStartedEvent {
+        wave: wave_manager.wave_display(),
+        stage: wave_manager.stage_display(),
+    });
 }

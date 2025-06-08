@@ -23,6 +23,7 @@ impl Plugin for GameAssetPlugin {
 #[derive(Resource)]
 pub struct GameAssets {
     pub audiowide_font: Handle<Font>,
+
     pub enemy_mesh: Handle<Mesh>,
     pub enemy_material: Handle<StandardMaterial>,
 
@@ -38,6 +39,8 @@ pub struct GameAssets {
     pub tower_placeholder_mesh: Handle<Mesh>,
     pub tower_placeholder_materials: TowerAssets<TowerPlaceholderMaterial>,
     pub tower_placeholder_empty_material: Handle<TowerPlaceholderMaterial>,
+
+    pub tower_icons: TowerAssets<Image>,
 }
 
 pub struct TowerAssets<T: Asset> {
@@ -188,6 +191,25 @@ fn load_assets(
         }),
     };
 
+    // Tower icons
+    let tower_bullet2_icon: Handle<Image> = asset_server.load("icons/bullet2.png");
+    let tower_bullet3_icon: Handle<Image> = asset_server.load("icons/bullet3.png");
+    let tower_bullet4_icon: Handle<Image> = asset_server.load("icons/bullet4.png");
+    let tower_bullet6_icon: Handle<Image> = asset_server.load("icons/bullet6.png");
+    let tower_explosion1_icon: Handle<Image> = asset_server.load("icons/explosion1.png");
+    let tower_explosion2_icon: Handle<Image> = asset_server.load("icons/explosion2.png");
+    let tower_explosion3_icon: Handle<Image> = asset_server.load("icons/explosion3.png");
+
+    let tower_icons = TowerAssets {
+        bullet2: tower_bullet2_icon,
+        bullet3: tower_bullet3_icon,
+        bullet4: tower_bullet4_icon,
+        bullet6: tower_bullet6_icon,
+        explosion1: tower_explosion1_icon,
+        explosion2: tower_explosion2_icon,
+        explosion3: tower_explosion3_icon,
+    };
+
     commands.insert_resource(GameAssets {
         audiowide_font,
         enemy_mesh,
@@ -201,6 +223,7 @@ fn load_assets(
         tower_placeholder_mesh,
         tower_placeholder_empty_material,
         tower_placeholder_materials,
+        tower_icons,
     });
 }
 

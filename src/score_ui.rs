@@ -1,7 +1,9 @@
-use bevy::{prelude::*, text::FontWeight};
+use bevy::prelude::*;
 
 use crate::{
-    game_assets::GameAssets, score::{ComboResetEvent, IncreaseScoreEvent, PlayerScore, ScoreSet}, AppState
+    AppState,
+    game_assets::GameAssets,
+    score::{ComboResetEvent, IncreaseScoreEvent, PlayerScore, ScoreSet},
 };
 
 pub struct ScoreUiPlugin;

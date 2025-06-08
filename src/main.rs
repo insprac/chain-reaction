@@ -21,6 +21,7 @@ mod tower;
 mod waves;
 mod score;
 mod score_ui;
+mod reward_select;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -34,6 +35,7 @@ pub enum GameState {
     Running,
     Paused,
     Building,
+    RewardSelect,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,5 +82,6 @@ fn main() {
         .add_plugins(explosion::ExplosionPlugin)
         .add_plugins(score::ScorePlugin)
         .add_plugins(score_ui::ScoreUiPlugin)
+        .add_plugins(reward_select::RewardSelectPlugin)
         .run();
 }

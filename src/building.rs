@@ -1,12 +1,11 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
-use hexx::{EdgeDirection, Hex};
+use hexx::Hex;
 
 use crate::{
     AppState, GameState,
     arena::Arena,
     arena_index::ArenaIndex,
     game_assets::GameAssets,
-    materials::TowerPlaceholderMaterial,
     pointer_tracking::{PointerChangedHexEvent, PointerPosition},
     tower::{PlaceTowerCommand, Tower, TowerAction, TowerKind},
 };
@@ -68,15 +67,7 @@ impl BuildingSettings {
 impl Default for BuildingSettings {
     fn default() -> Self {
         BuildingSettings {
-            towers: vec![
-                TowerKind::Bullet2,
-                TowerKind::Bullet3,
-                TowerKind::Bullet4,
-                TowerKind::Bullet6,
-                TowerKind::Explosion1,
-                TowerKind::Explosion2,
-                TowerKind::Explosion3,
-            ],
+            towers: vec![],
             selected_tower: None,
         }
     }
