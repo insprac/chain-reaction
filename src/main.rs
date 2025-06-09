@@ -22,6 +22,7 @@ mod waves;
 mod score;
 mod score_ui;
 mod reward_select;
+mod hotbar;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -83,5 +84,6 @@ fn main() {
         .add_plugins(score::ScorePlugin)
         .add_plugins(score_ui::ScoreUiPlugin)
         .add_plugins(reward_select::RewardSelectPlugin)
+        .add_plugins(hotbar::HotbarPlugin)
         .run();
 }

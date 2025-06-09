@@ -61,6 +61,7 @@ fn setup_menu(mut commands: Commands) {
             ..default()
         },
         BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.8)),
+        ZIndex(1000),
         children![
             create_button(PauseMenuButton::Resume, "Resume"),
             create_button(PauseMenuButton::Menu, "Menu"),

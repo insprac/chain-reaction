@@ -41,6 +41,7 @@ pub struct GameAssets {
     pub tower_placeholder_empty_material: Handle<TowerPlaceholderMaterial>,
 
     pub tower_icons: TowerAssets<Image>,
+    pub tower_empty_icon: Handle<Image>,
 }
 
 pub struct TowerAssets<T: Asset> {
@@ -192,6 +193,7 @@ fn load_assets(
     };
 
     // Tower icons
+    let tower_empty_icon: Handle<Image> = asset_server.load("icons/empty.png");
     let tower_bullet2_icon: Handle<Image> = asset_server.load("icons/bullet2.png");
     let tower_bullet3_icon: Handle<Image> = asset_server.load("icons/bullet3.png");
     let tower_bullet4_icon: Handle<Image> = asset_server.load("icons/bullet4.png");
@@ -224,6 +226,7 @@ fn load_assets(
         tower_placeholder_empty_material,
         tower_placeholder_materials,
         tower_icons,
+        tower_empty_icon,
     });
 }
 

@@ -97,6 +97,7 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
+
     // Wave 4
     Wave {
         stages: &[
@@ -132,6 +133,7 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
+
     // Wave 5
     Wave {
         stages: &[

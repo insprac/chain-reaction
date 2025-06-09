@@ -78,6 +78,7 @@ fn setup_reward_select(
                 ..default()
             },
             BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.9)),
+            ZIndex(1000),
         ))
         .with_children(|parent| {
             parent.spawn((

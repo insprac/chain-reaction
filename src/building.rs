@@ -18,6 +18,7 @@ impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<BuildingSettings>()
             .add_event::<RedrawPlacementEvent>()
+            .add_event::<BuildingsUpdatedEvent>()
             .add_systems(OnEnter(GameState::Building), setup_building)
             .add_systems(OnExit(GameState::Building), cleanup_building)
             .add_systems(OnExit(AppState::InGame), cleanup_building)
@@ -31,6 +32,7 @@ impl Plugin for BuildingPlugin {
             .add_systems(
                 Update,
                 (
+                    cancel_building.run_if(input_just_pressed(KeyCode::Escape)),
                     select_building,
                     place_building.run_if(input_just_pressed(MouseButton::Left)),
                     redraw_placement.run_if(
@@ -85,6 +87,21 @@ pub struct HighlightedHex;
 #[derive(Event)]
 pub struct RedrawPlacementEvent;
 
+#[derive(Event)]
+pub struct BuildingsUpdatedEvent;
+
+pub struct AddTowerCommand {
+    kind: TowerKind,
+}
+
+impl Command for AddTowerCommand {
+    fn apply(self, world: &mut World) -> () {
+        let mut settings = world.get_resource_mut::<BuildingSettings>().unwrap();
+        settings.towers.push(self.kind);
+        world.send_event(BuildingsUpdatedEvent);
+    }
+}
+
 fn setup_building(
     mut commands: Commands,
     arena: Res<Arena>,
@@ -125,12 +142,17 @@ fn cleanup_building(
     }
 }
 
+fn cancel_building(mut next_game_state: ResMut<NextState<GameState>>) {
+    next_game_state.set(GameState::Running);
+}
+
 fn place_building(
     mut commands: Commands,
     mut settings: ResMut<BuildingSettings>,
     mut next_state: ResMut<NextState<GameState>>,
     arena_index: Res<ArenaIndex>,
     pointer_pos: Res<PointerPosition>,
+    mut evw_buildings_updated: EventWriter<BuildingsUpdatedEvent>,
 ) {
     if arena_index.is_occupied(&pointer_pos.hex) {
         return;
@@ -155,6 +177,8 @@ fn place_building(
     // Remove the tower from the player's collection.
     settings.towers.remove(selected_tower);
     settings.selected_tower = None;
+
+    evw_buildings_updated.write(BuildingsUpdatedEvent);
 
     // Return to playing the game
     next_state.set(GameState::Running);
