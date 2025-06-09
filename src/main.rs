@@ -11,20 +11,20 @@ mod enemy;
 mod explosion;
 mod force;
 mod game_assets;
+mod game_over;
 mod health;
+mod hotbar;
+mod loading;
 mod materials;
 mod menu;
 mod pause;
 mod player;
 mod pointer_tracking;
-mod tower;
-mod waves;
+mod reward_select;
 mod score;
 mod score_ui;
-mod reward_select;
-mod hotbar;
-mod game_over;
-mod loading;
+mod tower;
+mod waves;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {

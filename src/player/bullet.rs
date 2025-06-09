@@ -5,7 +5,8 @@ use crate::{
     arena_index::{ArenaHex, ArenaIndex, OutOfBoundsEvent},
     enemy::Enemy,
     game_assets::GameAssets,
-    health::DamageEvent, tower::TriggerTowerEvent,
+    health::DamageEvent,
+    tower::TriggerTowerEvent,
 };
 
 const BULLET_SPEED: f32 = 30.0;

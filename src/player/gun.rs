@@ -37,10 +37,7 @@ pub fn update_gun_cooldown(time: Res<Time>, mut q_gun: Query<&mut PlayerGun>) ->
     Ok(())
 }
 
-pub fn fire_gun(
-    mut commands: Commands,
-    mut q_gun: Query<(&mut PlayerGun, &Transform)>,
-) -> Result {
+pub fn fire_gun(mut commands: Commands, mut q_gun: Query<(&mut PlayerGun, &Transform)>) -> Result {
     let (mut gun, gun_transform) = q_gun.single_mut()?;
 
     if !gun.cooldown.finished() {
@@ -53,7 +50,10 @@ pub fn fire_gun(
         .with_rotation(Quat::from_axis_angle(Vec3::Y, -PI / 2.0 + -gun.angle));
     transform.translation = transform.translation + transform.forward().as_vec3() * 1.5;
 
-    commands.queue(SpawnPlayerBulletCommand { transform, trigger_history: Vec::new() });
+    commands.queue(SpawnPlayerBulletCommand {
+        transform,
+        trigger_history: Vec::new(),
+    });
 
     Ok(())
 }

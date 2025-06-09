@@ -79,13 +79,21 @@ fn cleanup_menu(
 fn button_interaction(
     mut commands: Commands,
     mut q_interaction: Query<
-        (&Interaction, &MenuButton, &mut Button, &mut BorderColor, &Children),
+        (
+            &Interaction,
+            &MenuButton,
+            &mut Button,
+            &mut BorderColor,
+            &Children,
+        ),
         Changed<Interaction>,
     >,
     mut q_text_color: Query<&mut TextColor>,
     mut evw_app_exit: EventWriter<AppExit>,
 ) -> Result {
-    for (interaction, menu_button, mut button, mut border_color, children) in q_interaction.iter_mut() {
+    for (interaction, menu_button, mut button, mut border_color, children) in
+        q_interaction.iter_mut()
+    {
         let mut text_color = q_text_color.get_mut(children[0])?;
 
         match *interaction {

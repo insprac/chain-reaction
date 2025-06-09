@@ -35,7 +35,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 2
     Wave {
         stages: &[
@@ -66,7 +65,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 3
     Wave {
         stages: &[
@@ -96,7 +94,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 4
     Wave {
         stages: &[
@@ -136,7 +133,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 5
     Wave {
         stages: &[
@@ -176,7 +172,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 6
     Wave {
         stages: &[
@@ -220,7 +215,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 7
     Wave {
         stages: &[
@@ -268,7 +262,6 @@ pub const WAVES: &[Wave] = &[
             ],
         },
     },
-
     // Wave 8
     Wave {
         stages: &[
