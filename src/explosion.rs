@@ -82,6 +82,7 @@ impl Command for CreateExplosionCommand {
                 color: self.color,
                 time: 0.0,
                 duration: self.duration.as_secs_f32(),
+                ..default()
             })
         };
 

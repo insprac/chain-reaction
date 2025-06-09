@@ -1,17 +1,22 @@
 #import bevy_pbr::forward_io::VertexOutput
 
-@group(2) @binding(0) var<uniform> material_color: vec4<f32>;
-@group(2) @binding(1) var<uniform> time: f32;
-@group(2) @binding(2) var<uniform> duration: f32;
+struct ExplodingRing {
+    material_color: vec4<f32>,
+    time: f32,
+    duration: f32,
+    _wasm_padding: vec2<f32>,
+}
+
+@group(2) @binding(0) var<uniform> ring: ExplodingRing;
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Skip if the time is up
-    if time > duration {
-        return vec4f(material_color.rgb, 0.0);
+    if ring.time > ring.duration {
+        return vec4f(ring.material_color.rgb, 0.0);
     }
 
-    let scaled_time = time / duration;
+    let scaled_time = ring.time / ring.duration;
 
     // Normalize fragment coordinates to a range of -1.0 to 1.0, with 0.0 at the center
     let uv = in.uv * 2.0 - 1.0;
@@ -31,5 +36,5 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Fade the ring out as it expands
     let fade = pow(1.0 - scaled_time, 4.0);
     
-    return vec4<f32>(material_color.rgb, ring_intensity * fade);
+    return vec4<f32>(ring.material_color.rgb, ring_intensity * fade);
 }

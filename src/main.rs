@@ -1,8 +1,4 @@
-use bevy::{
-    ecs::component::Component,
-    picking::mesh_picking::{MeshPickingPlugin, MeshPickingSettings, ray_cast::RayCastVisibility},
-    prelude::{App, AppExtStates, ClearColor, Color, DefaultPlugins, States},
-};
+use bevy::{asset::AssetMetaCheck, prelude::*};
 
 mod arena;
 mod arena_index;
@@ -11,20 +7,20 @@ mod enemy;
 mod explosion;
 mod force;
 mod game_assets;
+mod game_over;
 mod health;
+mod hotbar;
+mod loading;
 mod materials;
 mod menu;
 mod pause;
 mod player;
 mod pointer_tracking;
-mod tower;
-mod waves;
+mod reward_select;
 mod score;
 mod score_ui;
-mod reward_select;
-mod hotbar;
-mod game_over;
-mod loading;
+mod tower;
+mod waves;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
@@ -57,7 +53,13 @@ pub struct EnemyTeam;
 fn main() {
     App::new()
         // Defaults
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
+            // Wasm builds will check for meta files (that don't exist) if this isn't set.
+            // This causes errors and even panics in web builds on itch.
+            // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
+            meta_check: AssetMetaCheck::Never,
+            ..Default::default()
+        }))
         .add_plugins(MeshPickingPlugin)
         // Resources
         .insert_resource(MeshPickingSettings {

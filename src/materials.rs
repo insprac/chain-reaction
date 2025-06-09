@@ -63,15 +63,15 @@ impl Material for TowerPlaceholderMaterial {
     }
 }
 
-#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone, Default)]
 pub struct ExplodingRingMaterial {
     #[uniform(0)]
     pub color: LinearRgba,
     /// Gets ticked every frame to update the texture animation.
-    #[uniform(1)]
+    #[uniform(0)]
     pub time: f32,
     /// The total duration of the duration, nothing is rendered past this point in time.
-    #[uniform(2)]
+    #[uniform(0)]
     pub duration: f32,
 }
 
