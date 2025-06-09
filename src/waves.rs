@@ -14,15 +14,15 @@ pub const WAVES: &[Wave] = &[
     Wave {
         stages: &[
             WaveStage {
-                enemies: 3,
+                enemies: 2,
                 remaining_threshold: 0,
             },
             WaveStage {
-                enemies: 5,
+                enemies: 3,
                 remaining_threshold: 1,
             },
             WaveStage {
-                enemies: 6,
+                enemies: 4,
                 remaining_threshold: 2,
             },
         ],
@@ -40,20 +40,20 @@ pub const WAVES: &[Wave] = &[
     Wave {
         stages: &[
             WaveStage {
-                enemies: 6,
+                enemies: 4,
                 remaining_threshold: 0,
             },
             WaveStage {
-                enemies: 8,
+                enemies: 6,
                 remaining_threshold: 2,
             },
             WaveStage {
-                enemies: 10,
+                enemies: 6,
                 remaining_threshold: 4,
             },
             WaveStage {
-                enemies: 12,
-                remaining_threshold: 6,
+                enemies: 6,
+                remaining_threshold: 4,
             },
         ],
         reward: WaveReward {
@@ -71,26 +71,25 @@ pub const WAVES: &[Wave] = &[
     Wave {
         stages: &[
             WaveStage {
-                enemies: 8,
+                enemies: 6,
                 remaining_threshold: 0,
             },
             WaveStage {
-                enemies: 10,
+                enemies: 8,
                 remaining_threshold: 4,
             },
             WaveStage {
-                enemies: 14,
+                enemies: 8,
                 remaining_threshold: 6,
             },
             WaveStage {
-                enemies: 16,
-                remaining_threshold: 10,
+                enemies: 10,
+                remaining_threshold: 8,
             },
         ],
         reward: WaveReward {
             options: 2,
             pool: &[
-                TowerKind::Bullet2,
                 TowerKind::Bullet3,
                 TowerKind::Bullet4,
                 TowerKind::Explosion1,
@@ -102,28 +101,32 @@ pub const WAVES: &[Wave] = &[
     Wave {
         stages: &[
             WaveStage {
-                enemies: 12,
+                enemies: 8,
                 remaining_threshold: 0,
             },
             WaveStage {
-                enemies: 16,
+                enemies: 10,
                 remaining_threshold: 6,
             },
             WaveStage {
-                enemies: 20,
+                enemies: 12,
                 remaining_threshold: 8,
             },
             WaveStage {
-                enemies: 24,
+                enemies: 12,
                 remaining_threshold: 10,
             },
             WaveStage {
-                enemies: 26,
+                enemies: 14,
+                remaining_threshold: 12,
+            },
+            WaveStage {
+                enemies: 16,
                 remaining_threshold: 12,
             },
         ],
         reward: WaveReward {
-            options: 2,
+            options: 3,
             pool: &[
                 TowerKind::Bullet3,
                 TowerKind::Bullet4,
@@ -138,24 +141,172 @@ pub const WAVES: &[Wave] = &[
     Wave {
         stages: &[
             WaveStage {
+                enemies: 10,
+                remaining_threshold: 0,
+            },
+            WaveStage {
+                enemies: 12,
+                remaining_threshold: 8,
+            },
+            WaveStage {
+                enemies: 14,
+                remaining_threshold: 10,
+            },
+            WaveStage {
                 enemies: 16,
+                remaining_threshold: 12,
+            },
+            WaveStage {
+                enemies: 18,
+                remaining_threshold: 14,
+            },
+            WaveStage {
+                enemies: 20,
+                remaining_threshold: 16,
+            },
+        ],
+        reward: WaveReward {
+            options: 3,
+            pool: &[
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Bullet6,
+                TowerKind::Explosion2,
+                TowerKind::Explosion3,
+            ],
+        },
+    },
+
+    // Wave 6
+    Wave {
+        stages: &[
+            WaveStage {
+                enemies: 14,
+                remaining_threshold: 0,
+            },
+            WaveStage {
+                enemies: 16,
+                remaining_threshold: 10,
+            },
+            WaveStage {
+                enemies: 18,
+                remaining_threshold: 12,
+            },
+            WaveStage {
+                enemies: 20,
+                remaining_threshold: 14,
+            },
+            WaveStage {
+                enemies: 22,
+                remaining_threshold: 16,
+            },
+            WaveStage {
+                enemies: 24,
+                remaining_threshold: 18,
+            },
+            WaveStage {
+                enemies: 26,
+                remaining_threshold: 18,
+            },
+        ],
+        reward: WaveReward {
+            options: 3,
+            pool: &[
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Bullet6,
+                TowerKind::Explosion2,
+                TowerKind::Explosion3,
+            ],
+        },
+    },
+
+    // Wave 7
+    Wave {
+        stages: &[
+            WaveStage {
+                enemies: 18,
                 remaining_threshold: 0,
             },
             WaveStage {
                 enemies: 20,
-                remaining_threshold: 12,
-            },
-            WaveStage {
-                enemies: 26,
                 remaining_threshold: 14,
             },
             WaveStage {
-                enemies: 30,
+                enemies: 22,
                 remaining_threshold: 16,
             },
             WaveStage {
-                enemies: 34,
+                enemies: 24,
                 remaining_threshold: 18,
+            },
+            WaveStage {
+                enemies: 26,
+                remaining_threshold: 20,
+            },
+            WaveStage {
+                enemies: 32,
+                remaining_threshold: 22,
+            },
+            WaveStage {
+                enemies: 34,
+                remaining_threshold: 22,
+            },
+            WaveStage {
+                enemies: 38,
+                remaining_threshold: 26,
+            },
+        ],
+        reward: WaveReward {
+            options: 3,
+            pool: &[
+                TowerKind::Bullet3,
+                TowerKind::Bullet4,
+                TowerKind::Bullet6,
+                TowerKind::Explosion2,
+                TowerKind::Explosion3,
+            ],
+        },
+    },
+
+    // Wave 8
+    Wave {
+        stages: &[
+            WaveStage {
+                enemies: 22,
+                remaining_threshold: 0,
+            },
+            WaveStage {
+                enemies: 24,
+                remaining_threshold: 18,
+            },
+            WaveStage {
+                enemies: 26,
+                remaining_threshold: 20,
+            },
+            WaveStage {
+                enemies: 28,
+                remaining_threshold: 22,
+            },
+            WaveStage {
+                enemies: 34,
+                remaining_threshold: 24,
+            },
+            WaveStage {
+                enemies: 36,
+                remaining_threshold: 26,
+            },
+            WaveStage {
+                enemies: 38,
+                remaining_threshold: 26,
+            },
+            WaveStage {
+                enemies: 42,
+                remaining_threshold: 30,
+            },
+            WaveStage {
+                enemies: 50,
+                remaining_threshold: 40,
             },
         ],
         reward: WaveReward {
