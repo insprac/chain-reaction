@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::AppState;
+use crate::{AppState, game_assets::GameAssets};
 
 const NORMAL_BUTTON: Color = Color::srgb(1.0, 1.0, 1.0);
 const HOVERED_BUTTON: Color = Color::srgb(0.0, 0.63, 1.0);
@@ -29,7 +29,7 @@ pub enum MenuButton {
 #[derive(Component)]
 pub struct MenuCamera;
 
-fn setup_menu(mut commands: Commands) {
+fn setup_menu(mut commands: Commands, game_assets: Res<GameAssets>) {
     commands.spawn((
         Menu,
         Node {
@@ -42,8 +42,20 @@ fn setup_menu(mut commands: Commands) {
             ..default()
         },
         children![
-            create_button(MenuButton::Play, "Play Game"),
-            create_button(MenuButton::Exit, "Exit")
+            (
+                Node {
+                    margin: UiRect::bottom(Val::Px(50.0)),
+                    ..default()
+                },
+                Text::new("Chain Reaction"),
+                TextFont {
+                    font: game_assets.audiowide_font.clone(),
+                    font_size: 60.0,
+                    ..default()
+                },
+            ),
+            create_button(MenuButton::Play, "Play Game", &game_assets),
+            create_button(MenuButton::Exit, "Exit", &game_assets),
         ],
     ));
 
@@ -67,18 +79,19 @@ fn cleanup_menu(
 fn button_interaction(
     mut commands: Commands,
     mut q_interaction: Query<
-        (&Interaction, &MenuButton, &mut Button, &Children),
+        (&Interaction, &MenuButton, &mut Button, &mut BorderColor, &Children),
         Changed<Interaction>,
     >,
     mut q_text_color: Query<&mut TextColor>,
     mut evw_app_exit: EventWriter<AppExit>,
 ) -> Result {
-    for (interaction, menu_button, mut button, children) in q_interaction.iter_mut() {
+    for (interaction, menu_button, mut button, mut border_color, children) in q_interaction.iter_mut() {
         let mut text_color = q_text_color.get_mut(children[0])?;
 
         match *interaction {
             Interaction::Pressed => {
                 *text_color = TextColor(PRESSED_BUTTON);
+                *border_color = BorderColor(PRESSED_BUTTON);
                 button.set_changed();
 
                 match *menu_button {
@@ -92,10 +105,12 @@ fn button_interaction(
             }
             Interaction::Hovered => {
                 *text_color = TextColor(HOVERED_BUTTON);
+                *border_color = BorderColor(HOVERED_BUTTON);
                 button.set_changed();
             }
             Interaction::None => {
                 *text_color = TextColor(NORMAL_BUTTON);
+                *border_color = BorderColor(NORMAL_BUTTON);
             }
         }
     }
@@ -103,6 +118,26 @@ fn button_interaction(
     Ok(())
 }
 
-fn create_button(button: MenuButton, text: &str) -> impl Bundle + use<> {
-    (button, children![Text::new(text), TextColor(NORMAL_BUTTON)])
+fn create_button(button: MenuButton, text: &str, game_assets: &GameAssets) -> impl Bundle {
+    (
+        button,
+        Node {
+            width: Val::Px(300.0),
+            border: UiRect::all(Val::Px(2.0)),
+            padding: UiRect::all(Val::Px(8.0)),
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        BorderColor(NORMAL_BUTTON),
+        BorderRadius::all(Val::Px(6.0)),
+        children![
+            Text::new(text),
+            TextColor(NORMAL_BUTTON),
+            TextFont {
+                font: game_assets.audiowide_font.clone(),
+                font_size: 30.0,
+                ..default()
+            }
+        ],
+    )
 }

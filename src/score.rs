@@ -9,6 +9,7 @@ impl Plugin for ScorePlugin {
         app.add_event::<IncreaseScoreEvent>()
             .add_event::<ComboResetEvent>()
             .init_resource::<PlayerScore>()
+            .add_systems(OnEnter(AppState::InGame), reset_player_score)
             .add_systems(
                 Update,
                 (
@@ -33,8 +34,10 @@ pub struct PlayerScore {
     pub combo: u128,
     /// Combo resets when this timer ends, timer resets each time the score increases.
     pub combo_timer: Timer,
+    /// The highest combo the player has achieved.
+    pub highest_combo: u128,
     /// The largest chain of tower triggers to be scored, for gameover stats.
-    pub largest_chain: usize,
+    pub highest_chain: usize,
 }
 
 impl Default for PlayerScore {
@@ -43,7 +46,8 @@ impl Default for PlayerScore {
             score: 0,
             combo: 0,
             combo_timer: Timer::from_seconds(1.0, TimerMode::Once),
-            largest_chain: 0,
+            highest_combo: 0,
+            highest_chain: 0,
         }
     }
 }
@@ -60,6 +64,10 @@ pub struct IncreaseScoreEvent {
 /// Emitted when the player's combo is reset.
 #[derive(Event)]
 pub struct ComboResetEvent;
+
+fn reset_player_score(mut player_score: ResMut<PlayerScore>) {
+    *player_score = PlayerScore::default();
+}
 
 fn tick_combo(
     time: Res<Time>,
@@ -85,8 +93,12 @@ fn increase_score(
         player_score.score += event.score * chain_mult * combo_mult;
         player_score.combo += 1;
 
-        if event.chain_length > player_score.largest_chain {
-            player_score.largest_chain = event.chain_length;
+        if player_score.combo > player_score.highest_combo {
+            player_score.highest_combo = player_score.combo;
+        }
+
+        if event.chain_length > player_score.highest_chain {
+            player_score.highest_chain = event.chain_length;
         }
     }
 }

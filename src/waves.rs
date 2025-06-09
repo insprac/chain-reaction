@@ -309,6 +309,7 @@ fn spawn_stage(mut commands: Commands, arena: Res<Arena>, wave_manager: Res<Wave
 
 fn update_wave_progress(
     time: Res<Time>,
+    mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut wave_manager: ResMut<WaveManager>,
     mut evw_wave_stage_started: EventWriter<WaveStageStartedEvent>,
@@ -331,9 +332,8 @@ fn update_wave_progress(
         }
 
         if WAVES.len() <= wave_manager.wave + 1 {
-            // There are no more waves
-            // TODO replace with a victory state
-            info!("Victory!");
+            // There are no more waves, end the game
+            next_app_state.set(AppState::GameOver);
             return;
         }
 

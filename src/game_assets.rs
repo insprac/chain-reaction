@@ -16,9 +16,12 @@ pub struct GameAssetPlugin;
 
 impl Plugin for GameAssetPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_assets);
+        app.add_systems(First, load_assets);
     }
 }
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct GameAssetSet;
 
 #[derive(Resource)]
 pub struct GameAssets {

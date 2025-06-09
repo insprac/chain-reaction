@@ -23,9 +23,12 @@ mod score;
 mod score_ui;
 mod reward_select;
 mod hotbar;
+mod game_over;
+mod loading;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
+    Loading,
     Menu,
     InGame,
     GameOver,
@@ -63,7 +66,7 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::hsl(0.0, 0.0, 0.015)))
         // States
-        .insert_state(AppState::Menu)
+        .insert_state(AppState::Loading)
         .insert_state(GameState::Running)
         // Game Plugins
         .add_plugins(menu::MenuPlugin)
@@ -85,5 +88,7 @@ fn main() {
         .add_plugins(score_ui::ScoreUiPlugin)
         .add_plugins(reward_select::RewardSelectPlugin)
         .add_plugins(hotbar::HotbarPlugin)
+        .add_plugins(loading::LoadingPlugin)
+        .add_plugins(game_over::GameOverPlugin)
         .run();
 }
