@@ -16,14 +16,16 @@ pub struct TowerPlugin;
 
 impl Plugin for TowerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<TriggerTowerEvent>().add_systems(
-            Update,
-            trigger_towers
-                .in_set(TowerSet)
-                .run_if(on_event::<TriggerTowerEvent>)
-                .run_if(in_state(AppState::InGame))
-                .run_if(in_state(GameState::Running)),
-        );
+        app.add_event::<TriggerTowerEvent>()
+            .add_systems(OnExit(AppState::InGame), cleanup_towers)
+            .add_systems(
+                Update,
+                trigger_towers
+                    .in_set(TowerSet)
+                    .run_if(on_event::<TriggerTowerEvent>)
+                    .run_if(in_state(AppState::InGame))
+                    .run_if(in_state(GameState::Running)),
+            );
     }
 }
 
@@ -140,6 +142,12 @@ impl Command for PlaceTowerCommand {
         // Update the index to ensure no other towers are built here
         let mut arena_index = world.get_resource_mut::<ArenaIndex>().unwrap();
         arena_index.tower_index.insert(self.hex, id);
+    }
+}
+
+fn cleanup_towers(mut commands: Commands, q_tower: Query<Entity, With<Tower>>) {
+    for id in q_tower {
+        commands.entity(id).despawn();
     }
 }
 

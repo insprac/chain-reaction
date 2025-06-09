@@ -13,6 +13,7 @@ pub struct ArenaIndexPlugin;
 impl Plugin for ArenaIndexPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ArenaIndex>()
+            .add_systems(OnEnter(AppState::InGame), reset_index)
             .add_systems(
                 Update,
                 update_arena_hex_and_index
@@ -78,6 +79,10 @@ pub struct ArenaHex {
 pub struct OutOfBoundsEvent {
     pub last_valid_hex: Hex,
     pub out_of_bounds_hex: Hex,
+}
+
+fn reset_index(mut arena_index: ResMut<ArenaIndex>) {
+    *arena_index = ArenaIndex::default();
 }
 
 fn update_arena_hex_and_index(
