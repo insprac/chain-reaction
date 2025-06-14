@@ -16,7 +16,7 @@ pub struct GameAssetPlugin;
 
 impl Plugin for GameAssetPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(First, load_assets);
+        app.add_systems(PreStartup, load_assets);
     }
 }
 
